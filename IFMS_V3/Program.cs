@@ -44,7 +44,8 @@ builder.Services.AddMudServices();
 
 builder.Services.AddScoped(sp => new HttpClient
 {
-    BaseAddress = new Uri("https://10.0.0.22:7258")
+    BaseAddress = new Uri("https://192.168.1.167:7258")
+    //BaseAddress = new Uri("https://10.0.0.22:7258")
 
 });
 

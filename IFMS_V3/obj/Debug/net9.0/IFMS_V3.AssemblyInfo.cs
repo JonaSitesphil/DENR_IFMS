@@ -14,7 +14,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("IFMS_V3")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+c90e9319031522f42956dc9a1a8a64a22d36bf8f")]
 [assembly: System.Reflection.AssemblyProductAttribute("IFMS_V3")]
 [assembly: System.Reflection.AssemblyTitleAttribute("IFMS_V3")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]
