@@ -1,0 +1,111 @@
+﻿@using System.Text.Json
+@using IFMS_V3.Models.Burs
+@using IFMS_V3.Services.Burs
+@inject BursService BursService
+@inject ISnackbar Snackbar
+@using IFMS_V3.Dto.Burs
+<MudDialog>
+    <DialogContent>
+        <MudText Typo="Typo.h6" Class="mb-2">Confirm BURS Submission</MudText>
+        <MudDivider Class="mb-2" />
+
+        <MudForm>
+            <MudTextField @bind-Value="EditableBursForm.Payee" Label="Payee" ReadOnly="true" />
+            <MudTextField @bind-Value="EditableBursForm.BursNumber" Label="BURS Number" ReadOnly="true" />
+            <MudTextField @bind-Value="EditableBursForm.Office" Label="Office" ReadOnly="true" />
+            <MudDatePicker @bind-Date="EditableBursForm.BursDate" Label="Date" ReadOnly="true" />
+            <MudTextField @bind-Value="EditableBursForm.Address" Label="Address" ReadOnly="true" />
+            <MudTextField @bind-Value="EditableBursForm.Fund" Label="Fund" ReadOnly="true" />
+
+            <MudTextField Label="Responsibility Center" Value="@GetResponsibilityCenterName(EditableBursForm.ResponsibilityCenterId)" ReadOnly="true" />
+            <MudTextField @bind-Value="EditableBursForm.Particulars" Label="Particulars" ReadOnly="true" />
+            <MudTextField Label="MFO/PAP" Value="@GetMfoPapName(EditableBursForm.MfoPapId)" ReadOnly="true" />
+            <MudTextField Label="UACS Code" Value="@GetUacsName(EditableBursForm.UacsCodeId)" ReadOnly="true" />
+            <MudNumericField T="double" @bind-Value="EditableBursForm.Total" Label="Total" ReadOnly="true" />
+
+
+            <MudNumericField T="double" @bind-Value="EditableBursForm.Amount" Label="Amount" ReadOnly="true" />
+           
+        </MudForm>
+    </DialogContent>
+
+    <DialogActions>
+        <MudButton Color="Color.Default" OnClick="Cancel">Cancel</MudButton>
+        <MudButton Color="Color.Primary" OnClick="Confirm">Confirm</MudButton>
+    </DialogActions>
+</MudDialog>
+
+@code {
+    [CascadingParameter] IMudDialogInstance MudDialog { get; set; }
+    [Parameter] public BursModel BursForm { get; set; }
+
+    private BursModel EditableBursForm = new();
+
+    private List<ResponsibilityCenter> ResponsibilityCenters = new();
+    private List<MFOPAP> MFOPAPs = new();
+    private List<UACS> UACS = new();
+
+    protected override async Task OnInitializedAsync()
+    {
+        // Deep copy form data
+        foreach (var prop in typeof(BursModel).GetProperties())
+            prop.SetValue(EditableBursForm, prop.GetValue(BursForm));
+
+        try
+        {
+            ResponsibilityCenters = await BursService.GetResponsibilityCenters();
+            MFOPAPs = await BursService.GetMFOPAPs();
+            UACS = await BursService.GetUACS();
+        }
+        catch (Exception ex)
+        {
+            Snackbar.Add($"Failed to load dropdown data: {ex.Message}", Severity.Error);
+        }
+    }
+
+    private string GetResponsibilityCenterName(int id) =>
+        ResponsibilityCenters.FirstOrDefault(rc => rc.id == id) is var rc && rc != null ? $"{rc.rcCode} - {rc.rcName}" : string.Empty;
+
+    private string GetMfoPapName(int id) =>
+        MFOPAPs.FirstOrDefault(m => m.id == id) is var m && m != null ? $"{m.mfoPapCode} - {m.mfoPapDescription}" : string.Empty;
+
+    private string GetUacsName(int id) =>
+UACS.FirstOrDefault(u => u.id == id) is var u && u != null
+    ? (string.IsNullOrWhiteSpace(u.subObjectCode)
+        ? u.uacs.ToString()
+        : $"{u.subObjectCode} - {u.uacs}")
+    : string.Empty;
+
+    private void Cancel() => MudDialog.Cancel();
+
+    private async Task Confirm()
+    {
+        var result = await BursService.CreateBursAsync(EditableBursForm);
+        if (result.Status == "SUCCESS")
+        {
+            MudDialog.Close(DialogResult.Ok(EditableBursForm));
+        }
+        else
+        {
+            try
+            {
+                var errorDetails = JsonSerializer.Deserialize<BursValidationError>(result.Message, new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
+                if (errorDetails?.Errors != null)
+                {
+                    foreach (var field in errorDetails.Errors)
+                        foreach (var msg in field.Value)
+                            Snackbar.Add(msg, Severity.Error);
+                }
+                else
+                {
+                    Snackbar.Add($"Failed to create BURS: {result.Message}", Severity.Error);
+                }
+            }
+            catch
+            {
+                Snackbar.Add($"Failed to create BURS: {result.Message}", Severity.Error);
+            }
+        }
+    }
+
+}

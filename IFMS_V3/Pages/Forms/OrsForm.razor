@@ -1,0 +1,442 @@
+﻿@page "/ors-form"
+@using MudBlazor
+@using IFMS_V3.Models.Ors
+@using IFMS_V3.Dto.Ors
+@inject ISnackbar Snackbar
+@layout EmptyLayout
+@inject IFMS_V3.Services.Ors.OrsService OrsService
+@inject NavigationManager NavigationManager
+@using System.Text.Json
+@inject AuthenticationStateProvider AuthProvider
+@using Microsoft.AspNetCore.Components.Authorization
+@inject IDialogService DialogService
+@using IFMS_V3.Dialogs.Ors
+<AuthorizeView>
+    <Authorized Context="auth">
+        <div class="ors-form-container">
+            <MudText Typo="Typo.h5" Align="Align.Center" Class="mb-4">New ORS</MudText>
+
+            <MudForm @ref="mudForm" Model="orsForm">
+                <MudGrid Class="mt-2" GutterSize="16px">
+
+                    <MudItem xs="12" sm="6">
+                        <MudNumericField T="int" @bind-Value="orsForm.Ors_Id"
+                                         Label="ORS ID"
+                                         Min="10"
+                                         Required="true" />
+                    </MudItem>
+
+                    <!-- ORS Number -->
+                    <MudItem xs="12" sm="6">
+                        <MudTextField T="string" @bind-Value="orsForm.OrsNumber" Label="ORS Number" Required="true" />
+                    </MudItem>
+
+                    <!-- ORS Date -->
+                    <MudItem xs="12" sm="6">
+                        <MudDatePicker T="DateTime?" @bind-Date="orsForm.OrsDate" Label="ORS Date" Required="true" />
+                    </MudItem>
+
+                    <!-- Allotment Class -->
+                    <MudItem xs="12" sm="6">
+                        <MudSelect T="AllotmentClassEnum" @bind-Value="orsForm.AllotmentClass"
+                                   Label="Allotment Class" Required="true">
+
+                            <MudSelectItem T="AllotmentClassEnum" Value="default(AllotmentClassEnum)" Disabled="true">
+                                Select
+                            </MudSelectItem>
+
+                            <MudSelectItem T="AllotmentClassEnum" Value="@AllotmentClassEnum.PersonnelServices">
+                                Personnel Services
+                            </MudSelectItem>
+
+                            <MudSelectItem T="AllotmentClassEnum" Value="@AllotmentClassEnum.MaintenanceAndOtherOperatingExpenses">
+                                MOOE
+                            </MudSelectItem>
+
+                            <MudSelectItem T="AllotmentClassEnum" Value="@AllotmentClassEnum.FinancialExpenses">
+                                Financial Expenses
+                            </MudSelectItem>
+
+                            <MudSelectItem T="AllotmentClassEnum" Value="@AllotmentClassEnum.DirectCosts">
+                                Direct Costs
+                            </MudSelectItem>
+
+                            <MudSelectItem T="AllotmentClassEnum" Value="@AllotmentClassEnum.CapitalOutlay">
+                                Capital Outlay
+                            </MudSelectItem>
+
+                        </MudSelect>
+
+
+                    </MudItem>
+
+                    <!-- Fund Code -->
+                    <MudItem xs="12" sm="6">
+                        <MudSelect T="int" Label="Fund Code" @bind-Value="orsForm.FundCodeId"
+                                   FullWidth="true" Required="true" Virtualize="true"
+                                   OnScrollToBottom="LoadMoreFundCodes">
+
+                            <!-- Placeholder option -->
+                            <MudSelectItem T="int" Value="0" Disabled="true">Select</MudSelectItem>
+
+                            @foreach (var fundCode in fundCodes)
+                            {
+                                <MudSelectItem T="int" Value="fundCode.id">
+                                    @($"{fundCode.fundCodeNumber} - {fundCode.fundCodeDescription}")
+                                </MudSelectItem>
+                            }
+
+                            @if (fundCodeIsLoading)
+                            {
+                                <MudSelectItem T="int" Disabled="true">
+                                    <MudText>Loading...</MudText>
+                                </MudSelectItem>
+                            }
+
+                        </MudSelect>
+
+                    </MudItem>
+
+                    <!-- Responsibility Center -->
+                    <MudItem xs="12" sm="6">
+                        <MudSelect T="int" Label="Responsibility Center" @bind-Value="orsForm.ResponsibilityCenterId"
+                                   FullWidth="true" Required="true" Virtualize="true"
+                                   OnScrollToBottom="LoadMoreResponsibilityCenters">
+
+                            <MudSelectItem T="int" Value="0" Disabled="true">Select</MudSelectItem>
+
+                            @foreach (var rc in responsibilityCenters)
+                            {
+                                <MudSelectItem T="int" Value="rc.id">@($"{rc.rcCode} - {rc.rcName}")</MudSelectItem>
+                            }
+
+                            @if (rcIsLoading)
+                            {
+                                <MudSelectItem T="int" Disabled="true">
+                                    <MudText>Loading...</MudText>
+                                </MudSelectItem>
+                            }
+                        </MudSelect>
+
+                    </MudItem>
+
+                    <!-- Fund Cluster -->
+                    <MudItem xs="12" sm="6">
+
+                        <MudSelect T="int" Label="Fund Cluster" @bind-Value="orsForm.FundClusterId"
+                                   FullWidth="true" Virtualize="true" OnScrollToBottom="LoadMoreFundClusters">
+
+                            <MudSelectItem T="int" Value="0" Disabled="true">Select</MudSelectItem>
+
+                            @foreach (var fc in fundClusters)
+                            {
+                                <MudSelectItem T="int" Value="fc.id">@($"{fc.fundClusterName} - UACS: {fc.uacs}")</MudSelectItem>
+                            }
+                            @if (fcIsLoading)
+                            {
+                                <MudSelectItem T="int" Disabled="true">
+                                    <MudText>Loading...</MudText>
+                                </MudSelectItem>
+                            }
+                        </MudSelect>
+                    </MudItem>
+
+                    <!-- MFO/PAP -->
+                    <MudItem xs="12" sm="6">
+                        <MudSelect T="int" Label="MFO/PAPs" @bind-Value="orsForm.MfoPapId"
+                                   FullWidth="true" Virtualize="true" OnScrollToBottom="LoadMoreMFOPAPs">
+
+                            <MudSelectItem T="int" Value="0" Disabled="true">Select</MudSelectItem>
+
+                            @foreach (var mfo in mfopaps)
+                            {
+                                <MudSelectItem T="int" Value="mfo.id">@($"{mfo.mfoPapCode} - {mfo.mfoPapDescription}")</MudSelectItem>
+                            }
+
+                            @if (mfoIsLoading)
+                            {
+                                <MudSelectItem T="int" Disabled="true">
+                                    <MudText>Loading...</MudText>
+                                </MudSelectItem>
+                            }
+                        </MudSelect>
+                    </MudItem>
+
+                    <!-- UACS -->
+                    <MudItem xs="12" sm="6">
+                        <MudSelect T="int" Label="UACS Code" @bind-Value="orsForm.UacsCodeId"
+                                   FullWidth="true" Virtualize="true" OnScrollToBottom="LoadMoreUACS">
+
+                            <MudSelectItem T="int" Value="0" Disabled="true">Select</MudSelectItem>
+
+                            @foreach (var uac in uacs)
+                            {
+                                <MudSelectItem T="int" Value="uac.id">
+                                    @(string.IsNullOrWhiteSpace(uac.subObjectCode) ? uac.uacs.ToString() : $"{uac.subObjectCode} - {uac.uacs}")
+                                </MudSelectItem>
+                            }
+
+                            @if (uacsIsLoading)
+                            {
+                                <MudSelectItem T="int" Disabled="true">
+                                    <MudText>Loading...</MudText>
+                                </MudSelectItem>
+                            }
+                        </MudSelect>
+                    </MudItem>
+
+                    <!-- Payee -->
+                    <MudItem xs="12">
+                        <MudTextField T="string" @bind-Value="orsForm.Payee" Label="Payee" Required="true" />
+                    </MudItem>
+
+                    <!-- Office -->
+                    <MudItem xs="12">
+                        <MudTextField T="string" @bind-Value="orsForm.Office" Label="Office" Required="true" />
+                    </MudItem>
+
+                    <!-- Address -->
+                    <MudItem xs="12">
+                        <MudTextField T="string" @bind-Value="orsForm.Address" Label="Address" Required="true" />
+                    </MudItem>
+
+                    <MudItem xs="12">
+                        <MudTextField T="string" @bind-Value="orsForm.Particulars" Label="Particulars" Lines="4" TextArea="true" Required="true" />
+                    </MudItem>
+
+                    @* dropdown signatory *@
+                    <MudItem xs="12" sm="6">
+                        <MudText Typo="Typo.subtitle2" Class="mt-2">Signatory A</MudText>
+                        <MudTextField T="string" @bind-Value="orsForm.SignatoryA" Label="Name" Required="true" />
+                        <MudTextField T="string" @bind-Value="orsForm.PositionA" Label="Position" Required="true" />
+                    </MudItem>
+                    @* dropdown signatory *@
+                    <MudItem xs="12" sm="6">
+                        <MudText Typo="Typo.subtitle2" Class="mt-2">Signatory B</MudText>
+                        <MudTextField T="string" @bind-Value="orsForm.SignatoryB" Label="Name" Required="true" />
+                        <MudTextField T="string" @bind-Value="orsForm.PositionB" Label="Position" Required="true" />
+                    </MudItem>
+
+                    <MudItem xs="12" sm="6">
+                        <MudNumericField T="double" Value="orsForm.Amount" ValueChanged="OnAmountChanged" Label="Amount" Min="0.01" Required="true" />
+                    </MudItem>
+
+                    <MudItem xs="12" sm="6">
+                        <MudNumericField T="double" @bind-Value="orsForm.Total" Label="Total" Min="0.01" Required="true" ReadOnly="true" />
+                    </MudItem>
+
+                    <MudItem xs="12" sm="6" Class="d-flex justify-end align-end">
+                        <MudButton Variant="Variant.Outlined"
+                                   Color="Color.Secondary"
+                                   Disabled="isLoading"
+                                   OnClick="CancelForm"
+                                   Class="me-2">
+                            Cancel
+                        </MudButton>
+
+                        <MudButton Variant="Variant.Filled"
+                                   Color="Color.Primary"
+                                   Disabled="isLoading"
+                                   Loading="@isLoading"
+                                   LoadingIndicatorColor="Color.Inherit"
+                                   OnClick="OpenConfirmationDialog">
+                            Next
+                        </MudButton>
+                    </MudItem>
+                </MudGrid>
+            </MudForm>
+        </div>
+    </Authorized>
+
+    <NotAuthorized>
+        <MudContainer Class="mt-6 d-flex justify-center">
+            <MudAlert Severity="Severity.Error">
+                You are not authorized to view this page. Please <a href="/">log in</a>.
+            </MudAlert>
+        </MudContainer>
+    </NotAuthorized>
+</AuthorizeView>
+
+@code {
+    private MudForm? mudForm;
+    private OrsModel orsForm = new();
+    private bool isLoading = false;
+
+    private const int PageSize = 10;
+    private List<FundCode> fundCodes = new();
+    private int fundCodePage = 1;
+    private bool fundCodeIsLoading = false;
+    private bool fundCodeHasMore = true;
+
+    private List<ResponsibilityCenter> responsibilityCenters = new();
+    private int rcPage = 1;
+    private bool rcIsLoading = false;
+    private bool rcHasMore = true;
+
+    private List<FundCluster> fundClusters = new();
+    private int fcPage = 1;
+    private bool fcIsLoading = false;
+    private bool fcHasMore = true;
+
+    private List<MFOPAP> mfopaps = new();
+    private int mfoPage = 1;
+    private bool mfoIsLoading = false;
+    private bool mfoHasMore = true;
+
+    private List<UACS> uacs = new();
+    private int uacsPage = 1;
+    private bool uacsIsLoading = false;
+    private bool uacsHasMore = true;
+
+    private void OnAmountChanged(double value)
+    {
+        orsForm.Amount = value;
+        orsForm.Total = value;
+    }
+
+    protected override async Task OnInitializedAsync()
+    {
+        var authState = await AuthProvider.GetAuthenticationStateAsync();
+        var user = authState.User;
+
+        if (!user.Identity.IsAuthenticated)
+        {
+            NavigationManager.NavigateTo("/", true);
+            return;
+        }
+
+        await LoadMoreFundCodes();
+        await LoadMoreResponsibilityCenters();
+        await LoadMoreFundClusters();
+        await LoadMoreMFOPAPs();
+        await LoadMoreUACS();
+
+        orsForm.ResponsibilityCenterId = 0;
+    }
+
+    private async Task LoadMoreFundCodes()
+    {
+        if (fundCodeIsLoading || !fundCodeHasMore) return;
+        fundCodeIsLoading = true;
+        var result = await OrsService.GetFundCodes(fundCodePage, PageSize);
+        if (result?.Any() == true) { fundCodes.AddRange(result); fundCodePage++; }
+        else { fundCodeHasMore = false; }
+        fundCodeIsLoading = false;
+    }
+
+    private async Task LoadMoreResponsibilityCenters()
+    {
+        if (rcIsLoading || !rcHasMore) return;
+        rcIsLoading = true;
+        var result = await OrsService.GetResponsibilityCenters(rcPage, PageSize);
+        if (result?.Any() == true) { responsibilityCenters.AddRange(result); rcPage++; }
+        else { rcHasMore = false; }
+        rcIsLoading = false;
+    }
+
+    private async Task LoadMoreFundClusters()
+    {
+        if (fcIsLoading || !fcHasMore) return;
+        fcIsLoading = true;
+        var result = await OrsService.GetFundClusters(fcPage, PageSize);
+        if (result?.Any() == true) { fundClusters.AddRange(result); fcPage++; }
+        else { fcHasMore = false; }
+        fcIsLoading = false;
+    }
+
+    private async Task LoadMoreMFOPAPs()
+    {
+        if (mfoIsLoading || !mfoHasMore) return;
+        mfoIsLoading = true;
+        var result = await OrsService.GetMFOPAPs(mfoPage, PageSize);
+        if (result?.Any() == true) { mfopaps.AddRange(result); mfoPage++; }
+        else { mfoHasMore = false; }
+        mfoIsLoading = false;
+    }
+
+    private async Task LoadMoreUACS()
+    {
+        if (uacsIsLoading || !uacsHasMore) return;
+        uacsIsLoading = true;
+        var result = await OrsService.GetUACS(uacsPage, PageSize);
+        if (result?.Any() == true) { uacs.AddRange(result); uacsPage++; }
+        else { uacsHasMore = false; }
+        uacsIsLoading = false;
+    }
+    private async Task OpenConfirmationDialog()
+    {
+        await mudForm.Validate();
+        if (!mudForm.IsValid)
+        {
+            Snackbar.Add("Please fix the form errors.", Severity.Warning);
+            return;
+        }
+
+        var parameters = new DialogParameters
+        {
+            ["OrsForm"] = orsForm
+        };
+
+        var options = new DialogOptions { MaxWidth = MaxWidth.Large, FullWidth = true, CloseButton = true };
+        
+        var dialog = DialogService.Show<ConfirmationOrsDialog>("Confirm ORS Submission", parameters, options);
+        var result = await dialog.Result;
+
+        if (!result.Canceled)
+        {
+            var dto = MapToDto(orsForm);
+            orsForm = (OrsModel)result.Data;
+            Snackbar.Add("ORS created successfully!", Severity.Success);
+            NavigationManager.NavigateTo("/admin-budgetmanagement", forceLoad: true);
+        }
+    }
+
+    private async Task SubmitForm()
+    {
+        isLoading = true;
+        try
+        {
+            await OrsService.CreateORSAsync(orsForm);
+            Snackbar.Add("ORS successfully submitted.", Severity.Success);
+            NavigationManager.NavigateTo("/admin-budgetmanagement");
+        }
+        catch (Exception ex)
+        {
+            Snackbar.Add($"Error submitting ORS: {ex.Message}", Severity.Error);
+        }
+        finally
+        {
+            isLoading = false;
+        }
+    }
+
+    private void CancelForm()
+    {
+        NavigationManager.NavigateTo("/admin-budgetmanagement");
+    }
+    private AddOrsDto MapToDto(OrsModel model)
+    {
+        return new AddOrsDto
+        {
+            Payee = model.Payee, 
+            Office = model.Office,
+            Address = model.Address,
+            Particulars = model.Particulars,
+            Amount = model.Amount,
+            Total = model.Total,
+            OrsDate = model.OrsDate ?? DateTime.Now, // <-- FIX: fallback if null
+            OrsNumber = model.OrsNumber,
+            FundCodeId = model.FundCodeId,
+            ResponsibilityCenterId = model.ResponsibilityCenterId,
+            FundClusterId = model.FundClusterId,
+            MfoPapId = model.MfoPapId,
+            UacsCodeId = model.UacsCodeId,
+            SignatoryA = model.SignatoryA,
+            PositionA = model.PositionA,
+            SignatoryB = model.SignatoryB,
+            PositionB = model.PositionB,
+            AllotmentClass = model.AllotmentClass
+        };
+    }
+
+}

@@ -1,0 +1,41 @@
+﻿@using IFMS_V3.Shared
+@using Microsoft.AspNetCore.Components.Authorization
+@using Microsoft.AspNetCore.Authorization
+@inject NavigationManager NavigationManager
+
+<CascadingAuthenticationState>
+    <Router AppAssembly="@typeof(App).Assembly">
+        <Found Context="routeData">
+            @if (routeData.PageType?.CustomAttributes.Any(attr =>
+                        attr.AttributeType == typeof(AllowAnonymousAttribute)) == true)
+            {
+                <RouteView RouteData="@routeData" DefaultLayout="@typeof(MainLayout)" />
+            }
+            else
+            {
+                <AuthorizeRouteView RouteData="@routeData" DefaultLayout="@typeof(MainLayout)">
+                    <NotAuthorized>
+                        <div style="display: flex; justify-content: center; align-items: center; height: calc(100vh - 159px);">
+                            <MudText Typo="Typo.h4" Color="Color.Error">You are not authorized to view this content. Redirecting to login...</MudText>
+                        </div>
+                        <RedirectToLogin />
+                    </NotAuthorized>
+                    <Authorizing>
+                        <div style="display: flex; justify-content: center; align-items: center; height: calc(100vh - 159px);">
+                            <MudText Typo="Typo.h3" Color="Color.Error">Authenticating...</MudText>
+                        </div>
+                    </Authorizing>
+                </AuthorizeRouteView>
+            }
+            <FocusOnNavigate RouteData="@routeData" Selector="h1" />
+        </Found>
+        <NotFound>
+            <PageTitle>Not found</PageTitle>
+            <LayoutView Layout="@typeof(MainLayout)">
+                <div style="display: flex; justify-content: center; align-items: center; height: calc(100vh - 165px);">
+                    <MudText Typo="Typo.h4" Color="Color.Error">Sorry, there's nothing at this address.</MudText>
+                </div>
+            </LayoutView>
+        </NotFound>
+    </Router>
+</CascadingAuthenticationState>

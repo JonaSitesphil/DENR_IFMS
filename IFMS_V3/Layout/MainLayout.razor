@@ -1,0 +1,192 @@
+﻿@inherits LayoutComponentBase
+@implements IDisposable
+@using IFMS_V3.Services.Auth
+@using IFMS_V3.Dialogs.Template
+@using Microsoft.AspNetCore.Components.Authorization
+@using MudBlazor
+@inject HttpClient HttpClient
+@inject NavigationManager NavigationManager
+@inject AuthenticationStateProvider AuthenticationStateProvider
+@inject IDialogService DialogService
+
+<MudThemeProvider />
+<MudDialogProvider />
+<MudSnackbarProvider />
+<MudPopoverProvider />
+
+@if (!isInitialized)
+{
+    <div class="header-container">
+        <div class="top-header">
+            <div class="left-section">
+                <img src="sample-data/DENR.png" class="logo" />
+                <div class="agency-text">
+                    <div class="republic">Republic of the Philippines</div>
+                    <div class="agency-name">DEPARTMENT OF ENVIRONMENTAL AND NATURAL RESOURCES</div>
+                    <div class="agency-tagline">Kagawaran ng Kapaligiran at Likas na Yaman</div>
+                </div>
+            </div>
+
+            <div class="right-section">
+                <div class="time-label">Philippine Standard Time:</div>
+                <div class="date-value">@currentDate</div>
+                <div class="time-value">@currentTime</div>
+            </div>
+
+            <div class="img">
+                <img src="sample-data/BagongPH.png" alt="Bagong Pilipinas Logo" class="bagong-logo" />
+            </div>
+        </div>
+    </div>
+
+    <MudLayout>
+        <MudAppBar Style="top: unset; position: relative;">
+            <MudIconButton Icon="@Icons.Material.Filled.Menu"
+                           Color="Color.Inherit"
+                           Edge="Edge.Start"
+                           OnClick="@ToggleDrawer" />
+
+            <MudText Typo="Typo.h6" Class="dashboard-title" Color="Color.Inherit">
+                @GetPageTitle()
+            </MudText>
+
+            <MudSpacer />
+
+            <MudButton OnClick="OpenDialogAsync"
+                       Variant="Variant.Filled"
+                       Color="Color.Primary"
+                       Style="min-width: unset; padding: 4px; width: 30px; height: 30px; border-radius: 50%;">
+                <MudIcon Icon="@Icons.Material.Filled.Notifications" />
+            </MudButton>
+        </MudAppBar>
+
+        <MudDrawer @bind-Open="_open"
+                   Variant="DrawerVariant.Temporary"
+                   Elevation="1"
+                   Anchor="Anchor.Left"
+                   Overlay="true"
+                   Class="drawer-overlay">
+            <MudNavMenu>
+                <MudNavLink Href="/admin-dashboard" Icon="@Icons.Material.Filled.Home">Dashboard</MudNavLink>
+                <MudNavLink Href="/admin-budgetmanagement" Icon="@Icons.Material.Filled.AccountBalance">Budget Management</MudNavLink>
+                <MudNavLink Href="/user-management" Icon="@Icons.Material.Filled.PersonAdd">User Management</MudNavLink>
+                <MudNavLink Href="/signatories" Icon="@Icons.Material.Filled.PersonAdd">Signatories</MudNavLink>
+
+                <MudNavLink Icon="@Icons.Material.Filled.People" OnClick="HandleLogout">Logout</MudNavLink>
+            </MudNavMenu>
+        </MudDrawer>
+
+        <MudMainContent Class="main-content">
+            @Body
+        </MudMainContent>
+    </MudLayout>
+}
+
+@code {
+    private string currentTime;
+    private string currentDate;
+    private System.Timers.Timer timer;
+    private bool _open = false;
+    private bool isInitialized = true;
+
+    protected override async Task OnInitializedAsync()
+    {
+        UpdateDateTime();
+        timer = new System.Timers.Timer(1000);
+        timer.Elapsed += (sender, e) =>
+        {
+            UpdateDateTime();
+            InvokeAsync(StateHasChanged);
+        };
+        timer.Start();
+
+        // Authentication Check Logic
+        var authState = await AuthenticationStateProvider.GetAuthenticationStateAsync();
+        var user = authState.User;
+
+        if (user.Identity != null && user.Identity.IsAuthenticated)
+        {
+            var firstTimeLogin = user.FindFirst("FirstTimeLogin")?.Value;
+
+            var currentUri = NavigationManager.ToBaseRelativePath(NavigationManager.Uri).ToLower();
+
+            if (firstTimeLogin == "True" && currentUri != "change-password")
+            {
+                NavigationManager.NavigateTo("/change-password", true);
+                return;
+            }
+        }
+        else
+        {
+            // User is not authenticated -> Redirect to login
+            NavigationManager.NavigateTo("/", true);
+            return;
+        }
+
+        isInitialized = false;
+        StateHasChanged();
+    }
+
+    private void ToggleDrawer() => _open = !_open;
+
+    private void UpdateDateTime()
+    {
+        var now = DateTime.Now;
+        currentTime = now.ToString("hh:mm:ss tt");
+        currentDate = now.ToString("dddd, MMMM dd, yyyy");
+    }
+
+    private string GetPageTitle()
+    {
+        var uri = NavigationManager.Uri.ToLower();
+
+        if (uri.Contains("/admin-dashboard"))
+            return "Dashboard";
+        else if (uri.Contains("/admin-budgetmanagement"))
+            return "Budget Management";
+        else if (uri.Contains("/login"))
+            return "Login";
+        else if (uri.Contains("/user-management"))
+            return "User Management";
+        else if (uri.Contains("/user-registration"))
+            return "User Registration";
+        else if (uri.Contains("signatories"))
+            return "Signatories";
+
+        else
+            return "/";
+    }
+
+    private async Task OpenDialogAsync()
+    {
+        await DialogService.ShowAsync<Notification>("Notifications");
+    }
+
+    private async Task HandleLogout()
+    {
+        try
+        {
+            var requestMessage = new HttpRequestMessage(HttpMethod.Post, "api/Auth/logout");
+            requestMessage.SetBrowserRequestCredentials(BrowserRequestCredentials.Include);
+            var response = await HttpClient.SendAsync(requestMessage);
+
+            response.EnsureSuccessStatusCode();
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Error during logout: {ex.Message}");
+        }
+
+        if (AuthenticationStateProvider is CookieAuthenticationStateProvider authStateProvider)
+        {
+            authStateProvider.NotifyUserLoggedOut();
+        }
+
+        NavigationManager.NavigateTo("/", replace: true, forceLoad: true);
+    }
+
+    public void Dispose()
+    {
+        timer?.Dispose();
+    }
+}

@@ -1,0 +1,28 @@
+﻿@inject IDialogService DialogService
+@using MudBlazor
+
+<MudDialog>
+    <DialogContent>
+        <div class="py-2">
+            <MudText Typo="Typo.h6" Align="Align.Center">
+                @Message
+            </MudText>
+        </div>
+    </DialogContent>
+    <DialogActions>
+        <MudButton Color="Color.Primary" OnClick="Close">OK</MudButton>
+    </DialogActions>
+</MudDialog>
+
+@code {
+    [CascadingParameter]
+    private IMudDialogInstance MudDialog { get; set; }
+
+    [Parameter]
+    public string Message { get; set; }
+
+    private void Close()
+    {
+        MudDialog.Close(DialogResult.Ok(true));
+    }
+}

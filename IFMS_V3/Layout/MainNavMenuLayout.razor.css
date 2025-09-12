@@ -1,0 +1,39 @@
+﻿/* Sidebar nav menu */
+/*.mud-navmenu {
+    font-size: 0.95rem;
+    padding-top: 0.5rem;
+}
+
+.mud-nav-link {
+    color: #333 !important;
+    border-radius: 6px;
+    margin: 0.2rem 0;
+    padding: 0.7rem 1rem;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+    .mud-nav-link:hover {
+        background-color: rgba(0, 51, 102, 0.1) !important;
+        color: #003366 !important;
+    }
+
+    .mud-nav-link.active {
+        background-color: #e6f0ff !important;
+        color: #003366 !important;
+        font-weight: 600;
+    }
+
+.mud-nav-group .mud-nav-link-text {
+    font-size: 0.8rem;
+    text-transform: uppercase;
+    font-weight: 600;
+    color: #555;
+}*/
+
+/* Logout */
+/*.mud-nav-link[icon="Logout"] {
+    color: #d32f2f !important;
+    font-weight: bold;
+}*/

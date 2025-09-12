@@ -1,0 +1,90 @@
+﻿﻿@using IFMS_V3.Models.Auth
+@inject IDialogService DialogService
+
+<MudDialog>
+    <DialogContent>
+        <MudText Typo="Typo.h6">Enter the OTP sent to your email</MudText>
+
+        <MudTextField Label="Verification Code"
+                      @bind-Value="code"
+                      Required="true"
+                      Immediate="true"
+                      MaxLength="6" />
+
+        <MudButton Disabled="@resendDisabled"
+                   Variant="Variant.Text"
+                   OnClick="ResendOtpAsync"
+                   Style="margin-top: 10px;">
+            @resendButtonText
+        </MudButton>
+    </DialogContent>
+
+    <DialogActions>
+        <MudButton OnClick="VerifyCodeAsync" Color="Color.Primary">Verify</MudButton>
+        <MudButton OnClick="() => MudDialog.Cancel()">Cancel</MudButton>
+    </DialogActions>
+</MudDialog>
+
+@code {
+    [CascadingParameter] IMudDialogInstance MudDialog { get; set; } = default!;
+    [Parameter] public string Email { get; set; } = string.Empty;
+
+    private string code;
+    private bool resendDisabled = false;
+    private string resendButtonText = "Resend Code";
+
+    [Inject] public HttpClient Http { get; set; }
+    [Inject] public ISnackbar Snackbar { get; set; }
+
+    private async Task VerifyCodeAsync()
+    {
+        var payload = new { email = Email, code = code };
+
+        var response = await Http.PostAsJsonAsync("/api/auth/verify-email", payload);
+        var result = await response.Content.ReadFromJsonAsync<ApiResponse<object>>();
+
+        if (result?.Status == "SUCCESS")
+        {
+            Snackbar.Add("Email verified successfully!", Severity.Success);
+            MudDialog.Close(DialogResult.Ok(true));
+        }
+        else
+        {
+            Snackbar.Add(result?.Message ?? "Verification failed.", Severity.Error);
+        }
+    }
+
+    private async Task ResendOtpAsync()
+    {
+        resendDisabled = true;
+        resendButtonText = "Resending...";
+
+        var response = await Http.PostAsJsonAsync("/api/auth/forgot", new { email = Email });
+        var result = await response.Content.ReadFromJsonAsync<ApiResponse<object>>();
+
+        if (result?.Status == "SUCCESS")
+        {
+            Snackbar.Add("OTP resent to your email.", Severity.Success);
+        }
+        else
+        {
+            Snackbar.Add(result?.Message ?? "Failed to resend OTP.", Severity.Error);
+        }
+
+        // Optional cooldown
+        for (int i = 300; i > 0; i--)
+        {
+            resendButtonText = $"Resend in {i}s";
+            StateHasChanged();
+            await Task.Delay(1000);
+        }
+
+        resendButtonText = "Resend Code";
+        resendDisabled = false;
+    }
+
+    protected override async Task OnInitializedAsync()
+    {
+        await ResendOtpAsync();
+    }
+}

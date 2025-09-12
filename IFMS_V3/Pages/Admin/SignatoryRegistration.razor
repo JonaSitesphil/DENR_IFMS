@@ -1,0 +1,79 @@
+﻿@page "/signatories-registration"
+@using IFMS_V3.Dto.Signatories
+@inject IFMS_V3.Services.Signatories.SignatoryService SignatoryService
+@inject ISnackbar Snackbar
+@inject NavigationManager Navigation
+
+<MudPaper Class="pa-6 mx-auto mt-6" Style="max-width:600px;">
+    <MudText Typo="Typo.h5" Class="mb-4">Add New Signatory</MudText>
+
+    <EditForm Model="_newSignatory" OnValidSubmit="HandleValidSubmit">
+        <DataAnnotationsValidator />
+        <ValidationSummary />
+
+        <!-- Printed Name -->
+        <MudTextField @bind-Value="_newSignatory.PrintedName"
+                      Label="Printed Name"
+                      Variant="Variant.Outlined"
+                      For="@(() => _newSignatory.PrintedName)"
+                      Required="true"
+                      Class="mb-3"
+                      OnInput="@( (ChangeEventArgs e) =>
+                                                _newSignatory.PrintedName = new string(
+                                                    (e.Value?.ToString() ?? string.Empty)
+                                                    .ToUpper()
+                                                    .Where(c => char.IsLetter(c) || c == ' ' || c == '.')
+                                                    .ToArray()
+                                                )
+                                            )" />
+
+        <!-- Position -->
+        <MudTextField @bind-Value="_newSignatory.Position"
+                      Label="Position"
+                      Variant="Variant.Outlined"
+                      For="@(() => _newSignatory.Position)"
+                      Required="true"
+                      Class="mb-3" />
+
+        <!-- Actions -->
+        <MudStack Row="true" Spacing="2">
+            <MudButton Variant="Variant.Filled" Color="Color.Primary" ButtonType="ButtonType.Submit">
+                Save
+            </MudButton>
+            <MudButton Variant="Variant.Outlined" Color="Color.Secondary" OnClick="Cancel">
+                Cancel
+            </MudButton>
+        </MudStack>
+    </EditForm>
+</MudPaper>
+
+@code {
+    private AddSignatoriesDto _newSignatory = new();
+
+    private async Task HandleValidSubmit()
+    {
+        try
+        {
+            var response = await SignatoryService.CreateSignatory(_newSignatory);
+
+            if (response != null && response.Status == "SUCCESS")
+            {
+                Snackbar.Add("Signatory added successfully.", Severity.Success);
+                Navigation.NavigateTo("/Signatories");
+            }
+            else
+            {
+                Snackbar.Add($" Failed: {response?.Message ?? "Unknown error"}", Severity.Error);
+            }
+        }
+        catch (Exception ex)
+        {
+            Snackbar.Add($" Unexpected error: {ex.Message}", Severity.Error);
+        }
+    }
+
+    private void Cancel()
+    {
+        Navigation.NavigateTo("/Signatories");
+    }
+}

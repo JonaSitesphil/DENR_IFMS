@@ -1,0 +1,152 @@
+﻿@page "/"
+@layout LoginLayout
+@using IFMS_V3.Models.Auth.Login
+@using IFMS_V3.Services
+@using Microsoft.AspNetCore.Components.Authorization
+@using IFMS_V3.Shared
+@inject NavigationManager NavigationManager
+@inject AuthenticationStateProvider AuthenticationStateProvider
+@inject IDialogService DialogService
+@inject ISnackbar Snackbar
+@attribute [AllowAnonymous]
+@inject IFMS_V3.Services.Auth.AuthService AuthService
+@inject IFMS_V3.Services.Auth.CsrfService CsrfService
+
+
+
+<MudPaper Height="100vh" Width="100vw" Square="true" Class="d-flex flex-row">
+    <!-- Left: Logo Container -->
+    <div style="flex: 1; display: flex; justify-content: center; align-items: center;">
+        <div style="width: 600px; height: 600px; background-color: white; border-radius: 50%; display: flex; justify-content: center; align-items: center; box-shadow: 0 10px 100px rgba(0, 0, 0, 0.3); overflow: hidden;">
+            <MudImage Type="image/png" Src="Sample-data/DENR.png" Alt="DENR Logo"
+                      Style="width: 100%; height: 100%; object-fit: cover;" />
+        </div>
+    </div>
+    <MudPaper Class="d-flex flex-column align-center justify-center p-10"
+              Style="background-color: #003893; flex: 1; max-width: 500px; box-shadow: -5px 0 50px rgba(0, 0, 0, 0.5); border-radius: 0;">
+        <div style="width: 70%; margin: 0 auto;">
+            <MudText Typo="Typo.h1" Class="text-white fw-bold text-center">DENR</MudText>
+            <MudText Typo="Typo.h4" Class="text-white fw-bold mb-5 text-center">PORTAL</MudText>
+
+            <EditForm Model="@loginModel" OnValidSubmit="@HandleLogin">
+                <DataAnnotationsValidator />
+                <fieldset disabled="@isLoggingIn">
+                    <div class="mb-4">
+                        <InputText @bind-Value="loginModel.Email"
+                                   id="email"
+                                   class="form-control input-placeholder"
+                                   placeholder="Email"
+                                   style="border-radius: 5px; background-color: white;" />
+                    </div>
+
+                    <div class="mb-4">
+                        <InputText @bind-Value="loginModel.Password"
+                                   id="password"
+                                   type="password"
+                                   class="form-control input-placeholder"
+                                   placeholder="Password"
+                                   style="border-radius: 5px; background-color: white;" />
+                    </div>
+                        <a href="/forgot-password" style="color: white; text-decoration: underline;">
+                            Forgot Password
+                        </a>
+                   
+                </fieldset>
+
+                <MudButton Variant="Variant.Filled"
+                           ButtonType="ButtonType.Submit"
+                           Disabled="@isLoggingIn"
+                           Class="mt-2"
+                           Style="width: 100%; height: 40px; border-radius: 8px; font-weight: bold; background-color: black; color: white;">
+                    @if (isLoggingIn)
+                    {
+                        <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
+                        <span class="ms-2">Logging in...</span>
+                    }
+                    else
+                    {
+                        <span>Sign in</span>
+                    }
+                </MudButton>
+
+                <div style="text-align: center; margin-top: 15px;">
+                    <ValidationSummary />
+                </div>
+
+                @if (!string.IsNullOrEmpty(errorMessage))
+                {
+                    <div style="text-align: center; margin-top: 20px;">
+                        <MudText Style="color:red">@errorMessage</MudText>
+                    </div>
+                }
+            </EditForm>
+        </div>
+    </MudPaper>
+
+                   
+
+</MudPaper>
+
+@code {
+    private LoginModel loginModel = new LoginModel();
+    private string? errorMessage;
+    private bool isLoggingIn = false;
+
+    private async Task HandleLogin()
+    {
+        isLoggingIn = true;
+
+        var response = await AuthService.LoginAsync(loginModel);
+
+        if (response.Status == "CHANGE_PASSWORD" || response.FirstTime) // ✅ First-time or change password
+        {
+            await CsrfService.FetchCsrfTokenAsync();
+            NavigationManager.NavigateTo("/change-password", forceLoad: true);
+        }
+        else if (response.Status == "SUCCESS")
+        {
+            Snackbar.Configuration.PositionClass = Defaults.Classes.Position.TopRight;
+            Snackbar.Add("Login successful", Severity.Success, config =>
+                config.VisibleStateDuration = 5000);
+
+            var authState = await AuthenticationStateProvider.GetAuthenticationStateAsync();
+            await CsrfService.FetchCsrfTokenAsync();
+
+            var roleClaim = authState.User.Claims
+                .FirstOrDefault(c => c.Type == "http://schemas.microsoft.com/ws/2008/06/identity/claims/role")
+                ?.Value;
+
+            if (roleClaim == "Division Chief")
+                NavigationManager.NavigateTo("/div-dashboard", forceLoad: true);
+            else if (roleClaim == "Budget Officer I")
+                NavigationManager.NavigateTo("/processor-dashboard", forceLoad: true);
+            else if (roleClaim == "Super Admin")
+
+                NavigationManager.NavigateTo("/admin-dashboard", forceLoad: true);
+            else if (roleClaim == "Section Chief")
+                NavigationManager.NavigateTo("/section-chief-dashboard", forceLoad: true);
+            else if (roleClaim == "Budget Officer II")
+                NavigationManager.NavigateTo("/officer-dashboard", forceLoad: true);
+            else if (roleClaim == "Assistant Division Chief")
+                NavigationManager.NavigateTo("/assistant-div-dashboard", forceLoad: true);
+        }
+        else
+        {
+            Snackbar.Configuration.PositionClass = Defaults.Classes.Position.TopRight;
+
+            if (response.Data != null && response.Data.Count > 0)
+            {
+                foreach (var fieldErrors in response.Data)
+                    foreach (var error in fieldErrors.Value)
+                        Snackbar.Add(error, Severity.Error);
+            }
+            else
+            {
+                Snackbar.Add(response.Message ?? "Login failed. Please try again.", Severity.Error);
+            }
+        }
+
+        isLoggingIn = false;
+    }
+
+}

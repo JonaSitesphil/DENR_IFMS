@@ -1,0 +1,84 @@
+﻿@using Microsoft.AspNetCore.Components
+@using MudBlazor
+@inject ISnackbar Snackbar
+@using IFMS_V3.Models.User.Signatories
+@inject IDialogService DialogService
+
+@using IFMS_V3.Dto.UpdateSignatories
+@inject IFMS_V3.Services.Signatories.SignatoryService SignatoryService
+
+<MudDialog>
+    <DialogContent>
+        <MudTextField @bind-Value="_editableSignatory.PrintedName"
+                      Label="Printed Name"
+                      Variant="Variant.Outlined"
+                      Class="mb-3"
+                      OnInput="@( (ChangeEventArgs e) =>
+                                        _editableSignatory.PrintedName = new string(
+                                            (e.Value?.ToString() ?? string.Empty)
+                                            .ToUpper()
+                                            .Where(c => char.IsLetter(c) || c == '.')
+                                            .ToArray()
+                                        )
+                            )" />
+        <MudTextField @bind-Value="_editableSignatory.Position"
+                      Label="Position"
+                      Variant="Variant.Outlined"
+                      Class="mb-3" />
+    </DialogContent>
+
+    <DialogActions>
+        <MudButton OnClick="Save" Color="Color.Primary" Variant="Variant.Filled">
+            Save
+        </MudButton>
+        <MudButton OnClick="Cancel" Color="Color.Secondary" Variant="Variant.Text">
+            Cancel
+        </MudButton>
+    </DialogActions>
+</MudDialog>
+
+@code {
+    [CascadingParameter] IMudDialogInstance MudDialog { get; set; }
+    [Parameter] public SignatoriesModels SignatoryToEdit { get; set; }
+
+    private SignatoriesModels _editableSignatory = new();
+
+    protected override void OnInitialized()
+    {
+        // Clone the incoming signatory for editing
+        _editableSignatory = new SignatoriesModels
+        {
+            Id = SignatoryToEdit.Id,
+            PrintedName = SignatoryToEdit.PrintedName,
+            Position = SignatoryToEdit.Position,
+            Disabled = SignatoryToEdit.Disabled,
+            CreatedAt = SignatoryToEdit.CreatedAt,
+            updatedByName = SignatoryToEdit.updatedByName
+        };
+    }
+
+    private async Task Save()
+    {
+        try
+        {
+            var dto = new UpdateSignatoriesDto
+            {
+                PrintedName = _editableSignatory.PrintedName,
+                Position = _editableSignatory.Position
+            };
+
+            await SignatoryService.UpdateSignatoryAsync(SignatoryToEdit.Id, dto);
+
+            Snackbar.Add("Signatory updated successfully.", Severity.Success);
+
+            // ✅ return updated signatory to parent
+            MudDialog.Close(DialogResult.Ok(_editableSignatory));
+        }
+        catch (Exception ex)
+        {
+            Snackbar.Add($"Failed to save changes: {ex.Message}", Severity.Error);
+        }
+    }
+
+    private void Cancel() => MudDialog.Cancel();
+}

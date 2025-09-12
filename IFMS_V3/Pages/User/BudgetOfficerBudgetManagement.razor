@@ -1,0 +1,174 @@
+﻿@page "/officer-budgetmanagement"
+@layout BudgetOfficerLayout
+@using IFMS_V3.Dialogs
+@inject IDialogService DialogService
+@* @inject IFMS.Services.Dashboard.DashboardService DashboardService
+@using IFMS.Models.AdminDashboardModels
+@using Microsoft.AspNetCore.Components.Authorization
+@inject AuthenticationStateProvider AuthProvider
+@inject NavigationManager NavigationManager *@
+
+<MudContainer Class="mt-4 px-8" MaxWidth="MaxWidth.False">
+    <MudContainer Class="px-0" MaxWidth="MaxWidth.False">
+        <MudPaper>
+            <MudGrid Class="mb-4">
+                <MudItem xs="12" sm="8">
+                    <MudTextField @bind-Value="_searchText"
+                                  Placeholder="Search"
+                                  Variant="Variant.Outlined"
+                                  Adornment="Adornment.Start"
+                                  AdornmentIcon="@Icons.Material.Filled.Search"
+                                  Immediate="true"
+                                  Class="w-100"
+                                  Style="border-radius: 8px;" />
+                </MudItem>
+                <MudItem xs="6" sm="2" Class="d-flex justify-end">
+                    <MudSelect T="string"
+                               Value="@_selectedFilter"
+                               ValueChanged="OnOptionChanged"
+                               Class="w-100"
+                               Color="Color.Primary"
+                               Variant="Variant.Outlined"
+                               Dense="true">
+                        <MudSelectItem Value="@("Default")">Default</MudSelectItem>
+                        <MudSelectItem Value="@("Ors")">ORS</MudSelectItem>
+                        <MudSelectItem Value="@("Burs")">BURS</MudSelectItem>
+                        <MudSelectItem Value="@("Norsa")">NORSA</MudSelectItem>
+                    </MudSelect>
+                </MudItem>
+                <MudItem xs="6" sm="2" Class="d-flex justify-end">
+                    <MudButton Variant="Variant.Outlined"
+                               Color="Color.Primary"
+                               OnClick="RefreshTable"
+                               Class="w-100">
+                        Refresh
+                    </MudButton>
+                </MudItem>
+            </MudGrid>
+
+            @* <MudTable Items="FilteredRecords" Hover="true" Striped="true" Bordered="true">
+                <HeaderContent>
+                    <MudTh Style="text-align:center; padding: 1rem 8px; background-color: midnightblue; color: white;">Payee</MudTh>
+                    <MudTh Style="text-align:center; padding: 1rem 8px; background-color: midnightblue; color: white;">Transaction ID</MudTh>
+                    <MudTh Style="text-align:center; padding: 1rem 8px; background-color: midnightblue; color: white;">Amount</MudTh>
+                    <MudTh Style="text-align:center; padding: 1rem 8px; background-color: midnightblue; color: white;">Type</MudTh>
+                    <MudTh Style="text-align:center; padding: 1rem 8px; background-color: midnightblue; color: white;">Status</MudTh>
+                    <MudTh Style="text-align:center; padding: 1rem 8px; background-color: midnightblue; color: white;">Actions</MudTh>
+
+                </HeaderContent>
+                <RowTemplate Context="record">
+                    <MudTd DataLabel="Payee">@record.payee</MudTd>
+                    <MudTd DataLabel="ID">@record.id</MudTd>
+                    <MudTd DataLabel="Amount">@record.amount</MudTd>
+                    <MudTd DataLabel="Type">@record.type</MudTd>
+                    <MudTd DataLabel="Status">@record.status</MudTd>
+                    <MudTd>
+                       
+                        <MudButton>
+                            Review
+                        </MudButton>
+                        <MudButton>
+                            Reject
+                        </MudButton>
+                    </MudTd>
+                </RowTemplate>
+            </MudTable> *@
+        </MudPaper>
+    </MudContainer>
+</MudContainer>
+<MudContainer Class="mt-6 px-8" MaxWidth="MaxWidth.False">
+    <MudGrid Justify="Justify.Center" Spacing="2">
+        <MudItem xs="12" sm="2" Class="d-flex justify-center">
+            <MudButton Variant="Variant.Outlined"
+                       Color="Color.Primary"
+                       Style="border-radius: 24px; padding: 12px 24px; font-weight: 500; text-transform: none; min-width: 150px;">
+                Invalid
+            </MudButton>
+        </MudItem>
+
+        <MudItem xs="12" sm="2" Class="d-flex justify-center">
+            <MudButton Variant="Variant.Outlined"
+                       Color="Color.Primary"
+                       Style="border-radius: 24px; padding: 12px 24px; font-weight: 500; text-transform: none; min-width: 150px;">
+                Approve/Print
+            </MudButton>
+        </MudItem>
+    </MudGrid>
+</MudContainer>
+
+
+
+
+@code {
+    private bool hover1 = true;
+    private bool striped1 = true;
+    private bool bordered1 = true;
+
+    private string _searchText = "";
+    private string _selectedFilter = "Default";
+
+    // private List<AdmindashboardModel> records = new();
+    // private List<AdmindashboardModel> Bursrecords = new();
+
+
+
+    // private IEnumerable<AdmindashboardModel> FilteredRecords =>
+    //  records.Where(r =>
+    //      (_selectedFilter == "All" ||
+    //       (r.type?.ToString().Equals(_selectedFilter, StringComparison.OrdinalIgnoreCase) ?? false))
+    //      &&
+    //      (string.IsNullOrWhiteSpace(_searchText) ||
+    //       r.payee.Contains(_searchText, StringComparison.OrdinalIgnoreCase))
+    //  );
+
+
+
+    private async Task OnOptionChanged(string value)
+    {
+        _selectedFilter = value;
+        await InvokeAsync(StateHasChanged);
+    }
+
+    private void RefreshTable()
+    {
+        _searchText = "";
+        _selectedFilter = "Default";
+        StateHasChanged(); // re-render UI
+    }
+
+    private void PreviewRow(string row)
+    {
+        Console.WriteLine($"Preview clicked for row: {row}");
+        // Later: open a dialog with details
+    }
+    // protected override async Task OnInitializedAsync()
+    // {
+    //     var authState = await AuthProvider.GetAuthenticationStateAsync();
+    //     var user = authState.User;
+
+    //     if (!user.Identity.IsAuthenticated)
+    //     {
+    //         NavigationManager.NavigateTo("/", true);
+    //         return;
+    //     }
+
+    //     try
+    //     {
+    //         Call the service to get the records
+    //         var response = await DashboardService.GetAdminDashboardDataAsync();
+    //         var orsRecords = response?.Data?.Ors?.Records ?? new List<AdmindashboardModel>();
+    //         var bursRecords = response?.Data?.Burs?.Records ?? new List<AdmindashboardModel>();
+
+    //         records = orsRecords.Concat(bursRecords).ToList();
+
+
+    //         Call the service to get the records
+
+    //     }
+    //     catch (Exception ex)
+    //     {
+    //         Snackbar.Add($"Failed to load dashboard data. Please try again later. Error: {ex.Message}", Severity.Error);
+    //         records = new List<AdmindashboardModel>();
+    //     }
+    // }
+}

@@ -1,0 +1,220 @@
+is_global = true
+build_property.EnableAotAnalyzer = 
+build_property.EnableSingleFileAnalyzer = 
+build_property.EnableTrimAnalyzer = false
+build_property.IncludeAllContentForSelfExtract = 
+build_property.MudDebugAnalyzer = 
+build_property.MudAllowedAttributePattern = 
+build_property.MudAllowedAttributeList = 
+build_property.TargetFramework = net9.0
+build_property.TargetPlatformMinVersion = 
+build_property.UsingMicrosoftNETSdkWeb = 
+build_property.ProjectTypeGuids = 
+build_property.InvariantGlobalization = false
+build_property.PlatformNeutralAssembly = 
+build_property.EnforceExtendedAnalyzerRules = 
+build_property._SupportedPlatformList = browser
+build_property.RootNamespace = IFMS_V3
+build_property.RootNamespace = IFMS_V3
+build_property.ProjectDir = C:\Users\Jona Lira\source\repos\IFMS_V3\IFMS_V3\
+build_property.EnableComHosting = 
+build_property.EnableGeneratedComInterfaceComImportInterop = false
+build_property.RazorLangVersion = 9.0
+build_property.SupportLocalizedComponentNames = 
+build_property.GenerateRazorMetadataSourceChecksumAttributes = 
+build_property.MSBuildProjectDirectory = C:\Users\Jona Lira\source\repos\IFMS_V3\IFMS_V3
+build_property._RazorSourceGeneratorDebug = 
+build_property.EffectiveAnalysisLevelStyle = 9.0
+build_property.EnableCodeStyleSeverity = 
+
+[C:/Users/Jona Lira/source/repos/IFMS_V3/IFMS_V3/App.razor]
+build_metadata.AdditionalFiles.TargetPath = QXBwLnJhem9y
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Users/Jona Lira/source/repos/IFMS_V3/IFMS_V3/Dialogs/Auth/ChangePassword.razor]
+build_metadata.AdditionalFiles.TargetPath = RGlhbG9nc1xBdXRoXENoYW5nZVBhc3N3b3JkLnJhem9y
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Users/Jona Lira/source/repos/IFMS_V3/IFMS_V3/Dialogs/Auth/CheckYourEmail.razor]
+build_metadata.AdditionalFiles.TargetPath = RGlhbG9nc1xBdXRoXENoZWNrWW91ckVtYWlsLnJhem9y
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Users/Jona Lira/source/repos/IFMS_V3/IFMS_V3/Dialogs/Auth/ForgotPassword.razor]
+build_metadata.AdditionalFiles.TargetPath = RGlhbG9nc1xBdXRoXEZvcmdvdFBhc3N3b3JkLnJhem9y
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Users/Jona Lira/source/repos/IFMS_V3/IFMS_V3/Dialogs/Auth/OtpDialog.razor]
+build_metadata.AdditionalFiles.TargetPath = RGlhbG9nc1xBdXRoXE90cERpYWxvZy5yYXpvcg==
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Users/Jona Lira/source/repos/IFMS_V3/IFMS_V3/Dialogs/Auth/ResetPassword.razor]
+build_metadata.AdditionalFiles.TargetPath = RGlhbG9nc1xBdXRoXFJlc2V0UGFzc3dvcmQucmF6b3I=
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Users/Jona Lira/source/repos/IFMS_V3/IFMS_V3/Dialogs/Auth/VerificationCode.razor]
+build_metadata.AdditionalFiles.TargetPath = RGlhbG9nc1xBdXRoXFZlcmlmaWNhdGlvbkNvZGUucmF6b3I=
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Users/Jona Lira/source/repos/IFMS_V3/IFMS_V3/Dialogs/Burs/BursDialog.razor]
+build_metadata.AdditionalFiles.TargetPath = RGlhbG9nc1xCdXJzXEJ1cnNEaWFsb2cucmF6b3I=
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Users/Jona Lira/source/repos/IFMS_V3/IFMS_V3/Dialogs/Burs/ConfirmationBursDialog.razor]
+build_metadata.AdditionalFiles.TargetPath = RGlhbG9nc1xCdXJzXENvbmZpcm1hdGlvbkJ1cnNEaWFsb2cucmF6b3I=
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Users/Jona Lira/source/repos/IFMS_V3/IFMS_V3/Dialogs/Norsa/Norsa.razor]
+build_metadata.AdditionalFiles.TargetPath = RGlhbG9nc1xOb3JzYVxOb3JzYS5yYXpvcg==
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Users/Jona Lira/source/repos/IFMS_V3/IFMS_V3/Dialogs/Ors/ConfirmationOrsDialog.razor]
+build_metadata.AdditionalFiles.TargetPath = RGlhbG9nc1xPcnNcQ29uZmlybWF0aW9uT3JzRGlhbG9nLnJhem9y
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Users/Jona Lira/source/repos/IFMS_V3/IFMS_V3/Dialogs/Ors/OrsDialog.razor]
+build_metadata.AdditionalFiles.TargetPath = RGlhbG9nc1xPcnNcT3JzRGlhbG9nLnJhem9y
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Users/Jona Lira/source/repos/IFMS_V3/IFMS_V3/Dialogs/Ors/PdfDialog.razor]
+build_metadata.AdditionalFiles.TargetPath = RGlhbG9nc1xPcnNcUGRmRGlhbG9nLnJhem9y
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Users/Jona Lira/source/repos/IFMS_V3/IFMS_V3/Dialogs/Template/Notification.razor]
+build_metadata.AdditionalFiles.TargetPath = RGlhbG9nc1xUZW1wbGF0ZVxOb3RpZmljYXRpb24ucmF6b3I=
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Users/Jona Lira/source/repos/IFMS_V3/IFMS_V3/Dialogs/User/SignatoryDialog.razor]
+build_metadata.AdditionalFiles.TargetPath = RGlhbG9nc1xVc2VyXFNpZ25hdG9yeURpYWxvZy5yYXpvcg==
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Users/Jona Lira/source/repos/IFMS_V3/IFMS_V3/Dialogs/User/UserManagementDialog.razor]
+build_metadata.AdditionalFiles.TargetPath = RGlhbG9nc1xVc2VyXFVzZXJNYW5hZ2VtZW50RGlhbG9nLnJhem9y
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Users/Jona Lira/source/repos/IFMS_V3/IFMS_V3/Layout/EmptyLayout.razor]
+build_metadata.AdditionalFiles.TargetPath = TGF5b3V0XEVtcHR5TGF5b3V0LnJhem9y
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Users/Jona Lira/source/repos/IFMS_V3/IFMS_V3/Pages/Admin/AdminBudgetManagement.razor]
+build_metadata.AdditionalFiles.TargetPath = UGFnZXNcQWRtaW5cQWRtaW5CdWRnZXRNYW5hZ2VtZW50LnJhem9y
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Users/Jona Lira/source/repos/IFMS_V3/IFMS_V3/Pages/Admin/AdminDashboard.razor]
+build_metadata.AdditionalFiles.TargetPath = UGFnZXNcQWRtaW5cQWRtaW5EYXNoYm9hcmQucmF6b3I=
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Users/Jona Lira/source/repos/IFMS_V3/IFMS_V3/Pages/Admin/Signatories.razor]
+build_metadata.AdditionalFiles.TargetPath = UGFnZXNcQWRtaW5cU2lnbmF0b3JpZXMucmF6b3I=
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Users/Jona Lira/source/repos/IFMS_V3/IFMS_V3/Pages/Admin/SignatoryRegistration.razor]
+build_metadata.AdditionalFiles.TargetPath = UGFnZXNcQWRtaW5cU2lnbmF0b3J5UmVnaXN0cmF0aW9uLnJhem9y
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Users/Jona Lira/source/repos/IFMS_V3/IFMS_V3/Pages/Admin/UserDashboard.razor]
+build_metadata.AdditionalFiles.TargetPath = UGFnZXNcQWRtaW5cVXNlckRhc2hib2FyZC5yYXpvcg==
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Users/Jona Lira/source/repos/IFMS_V3/IFMS_V3/Pages/Admin/UserRegistration.razor]
+build_metadata.AdditionalFiles.TargetPath = UGFnZXNcQWRtaW5cVXNlclJlZ2lzdHJhdGlvbi5yYXpvcg==
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Users/Jona Lira/source/repos/IFMS_V3/IFMS_V3/Pages/Auth/Login.razor]
+build_metadata.AdditionalFiles.TargetPath = UGFnZXNcQXV0aFxMb2dpbi5yYXpvcg==
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Users/Jona Lira/source/repos/IFMS_V3/IFMS_V3/Pages/Forms/NorsaForm.razor]
+build_metadata.AdditionalFiles.TargetPath = UGFnZXNcRm9ybXNcTm9yc2FGb3JtLnJhem9y
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Users/Jona Lira/source/repos/IFMS_V3/IFMS_V3/Pages/User/AssistantDivisionChiefBudgetManagement.razor]
+build_metadata.AdditionalFiles.TargetPath = UGFnZXNcVXNlclxBc3Npc3RhbnREaXZpc2lvbkNoaWVmQnVkZ2V0TWFuYWdlbWVudC5yYXpvcg==
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Users/Jona Lira/source/repos/IFMS_V3/IFMS_V3/Pages/User/AssistantDivisionChiefDashboard.razor]
+build_metadata.AdditionalFiles.TargetPath = UGFnZXNcVXNlclxBc3Npc3RhbnREaXZpc2lvbkNoaWVmRGFzaGJvYXJkLnJhem9y
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Users/Jona Lira/source/repos/IFMS_V3/IFMS_V3/Pages/User/BudgetOfficerBudgetManagement.razor]
+build_metadata.AdditionalFiles.TargetPath = UGFnZXNcVXNlclxCdWRnZXRPZmZpY2VyQnVkZ2V0TWFuYWdlbWVudC5yYXpvcg==
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Users/Jona Lira/source/repos/IFMS_V3/IFMS_V3/Pages/User/BudgetOfficerDashboard.razor]
+build_metadata.AdditionalFiles.TargetPath = UGFnZXNcVXNlclxCdWRnZXRPZmZpY2VyRGFzaGJvYXJkLnJhem9y
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Users/Jona Lira/source/repos/IFMS_V3/IFMS_V3/Pages/User/DivisionChiefBudgetManagement.razor]
+build_metadata.AdditionalFiles.TargetPath = UGFnZXNcVXNlclxEaXZpc2lvbkNoaWVmQnVkZ2V0TWFuYWdlbWVudC5yYXpvcg==
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Users/Jona Lira/source/repos/IFMS_V3/IFMS_V3/Pages/User/DivisionChiefDashboard.razor]
+build_metadata.AdditionalFiles.TargetPath = UGFnZXNcVXNlclxEaXZpc2lvbkNoaWVmRGFzaGJvYXJkLnJhem9y
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Users/Jona Lira/source/repos/IFMS_V3/IFMS_V3/Pages/User/ProcessorBudgetManagement.razor]
+build_metadata.AdditionalFiles.TargetPath = UGFnZXNcVXNlclxQcm9jZXNzb3JCdWRnZXRNYW5hZ2VtZW50LnJhem9y
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Users/Jona Lira/source/repos/IFMS_V3/IFMS_V3/Pages/User/ProcessorDashboard.razor]
+build_metadata.AdditionalFiles.TargetPath = UGFnZXNcVXNlclxQcm9jZXNzb3JEYXNoYm9hcmQucmF6b3I=
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Users/Jona Lira/source/repos/IFMS_V3/IFMS_V3/Pages/User/SectionChiefBudgetManagement.razor]
+build_metadata.AdditionalFiles.TargetPath = UGFnZXNcVXNlclxTZWN0aW9uQ2hpZWZCdWRnZXRNYW5hZ2VtZW50LnJhem9y
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Users/Jona Lira/source/repos/IFMS_V3/IFMS_V3/Pages/User/SectionChiefDashboard.razor]
+build_metadata.AdditionalFiles.TargetPath = UGFnZXNcVXNlclxTZWN0aW9uQ2hpZWZEYXNoYm9hcmQucmF6b3I=
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Users/Jona Lira/source/repos/IFMS_V3/IFMS_V3/Shared/RedirectToLogin.razor]
+build_metadata.AdditionalFiles.TargetPath = U2hhcmVkXFJlZGlyZWN0VG9Mb2dpbi5yYXpvcg==
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Users/Jona Lira/source/repos/IFMS_V3/IFMS_V3/_Imports.razor]
+build_metadata.AdditionalFiles.TargetPath = X0ltcG9ydHMucmF6b3I=
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Users/Jona Lira/source/repos/IFMS_V3/IFMS_V3/Layout/AssistantDivisionChiefLayout.razor]
+build_metadata.AdditionalFiles.TargetPath = TGF5b3V0XEFzc2lzdGFudERpdmlzaW9uQ2hpZWZMYXlvdXQucmF6b3I=
+build_metadata.AdditionalFiles.CssScope = b-fgvoi79xw9
+
+[C:/Users/Jona Lira/source/repos/IFMS_V3/IFMS_V3/Layout/BudgetOfficerLayout.razor]
+build_metadata.AdditionalFiles.TargetPath = TGF5b3V0XEJ1ZGdldE9mZmljZXJMYXlvdXQucmF6b3I=
+build_metadata.AdditionalFiles.CssScope = b-74jrswsrsj
+
+[C:/Users/Jona Lira/source/repos/IFMS_V3/IFMS_V3/Layout/DivisionChiefLayout.razor]
+build_metadata.AdditionalFiles.TargetPath = TGF5b3V0XERpdmlzaW9uQ2hpZWZMYXlvdXQucmF6b3I=
+build_metadata.AdditionalFiles.CssScope = b-ch0ky2kmx8
+
+[C:/Users/Jona Lira/source/repos/IFMS_V3/IFMS_V3/Layout/LoginLayout.razor]
+build_metadata.AdditionalFiles.TargetPath = TGF5b3V0XExvZ2luTGF5b3V0LnJhem9y
+build_metadata.AdditionalFiles.CssScope = b-oidfrvjt5q
+
+[C:/Users/Jona Lira/source/repos/IFMS_V3/IFMS_V3/Layout/MainLayout.razor]
+build_metadata.AdditionalFiles.TargetPath = TGF5b3V0XE1haW5MYXlvdXQucmF6b3I=
+build_metadata.AdditionalFiles.CssScope = b-lbs29wys19
+
+[C:/Users/Jona Lira/source/repos/IFMS_V3/IFMS_V3/Layout/MainNavMenuLayout.razor]
+build_metadata.AdditionalFiles.TargetPath = TGF5b3V0XE1haW5OYXZNZW51TGF5b3V0LnJhem9y
+build_metadata.AdditionalFiles.CssScope = b-4k77c0kwtd
+
+[C:/Users/Jona Lira/source/repos/IFMS_V3/IFMS_V3/Layout/ProcessorLayout.razor]
+build_metadata.AdditionalFiles.TargetPath = TGF5b3V0XFByb2Nlc3NvckxheW91dC5yYXpvcg==
+build_metadata.AdditionalFiles.CssScope = b-k2250ibyrc
+
+[C:/Users/Jona Lira/source/repos/IFMS_V3/IFMS_V3/Layout/SectionChiefLayout.razor]
+build_metadata.AdditionalFiles.TargetPath = TGF5b3V0XFNlY3Rpb25DaGllZkxheW91dC5yYXpvcg==
+build_metadata.AdditionalFiles.CssScope = b-9nqh5o459t
+
+[C:/Users/Jona Lira/source/repos/IFMS_V3/IFMS_V3/Layout/SharedLayout.razor]
+build_metadata.AdditionalFiles.TargetPath = TGF5b3V0XFNoYXJlZExheW91dC5yYXpvcg==
+build_metadata.AdditionalFiles.CssScope = b-hctyrlj1e3
+
+[C:/Users/Jona Lira/source/repos/IFMS_V3/IFMS_V3/Pages/Forms/BursForm.razor]
+build_metadata.AdditionalFiles.TargetPath = UGFnZXNcRm9ybXNcQnVyc0Zvcm0ucmF6b3I=
+build_metadata.AdditionalFiles.CssScope = b-yj3nb95zoz
+
+[C:/Users/Jona Lira/source/repos/IFMS_V3/IFMS_V3/Pages/Forms/OrsForm.razor]
+build_metadata.AdditionalFiles.TargetPath = UGFnZXNcRm9ybXNcT3JzRm9ybS5yYXpvcg==
+build_metadata.AdditionalFiles.CssScope = b-ez8tz83ktx

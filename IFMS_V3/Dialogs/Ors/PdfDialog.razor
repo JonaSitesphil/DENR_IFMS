@@ -1,0 +1,154 @@
+﻿@using MudBlazor
+@using Microsoft.AspNetCore.Components.Authorization
+@inject IFMS_V3.Services.Ors.OrsService OrsService
+@inject ISnackbar Snackbar
+@inject NavigationManager Navigation
+@inject AuthenticationStateProvider AuthProvider
+@using IFMS_V3.Models.Ors.ProcessorModel
+@using System.Security.Claims
+@using static IFMS_V3.Models.Ors.ProcessorModel.ProcessorModel
+
+<MudDialog>
+    <DialogContent>
+        @if (!string.IsNullOrEmpty(PdfDataUrl))
+        {
+            <iframe src="@PdfDataUrl" style="width:100%;height:80vh;" frameborder="0"></iframe>
+        }
+        else
+        {
+            <div>Loading PDF...</div>
+        }
+    </DialogContent>
+
+    <DialogActions>
+        @if (UserRole == "Budget Officer I")
+        {
+            <MudButton Color="Color.Primary" OnClick="Close">Close</MudButton>
+            <MudButton Color="Color.Error" OnClick="@(() => OnReject(orsListId))">Reject</MudButton>
+            <MudButton Color="Color.Primary" OnClick="@(() => OnReview(orsListId))">Review</MudButton>
+        }
+        else if (UserRole == "Budget Officer II")
+        {
+            <MudButton Color="Color.Success" OnClick="@(() => OnApprove(orsListId))">Approve</MudButton>
+            <MudButton Color="Color.Error" OnClick="@(() => OnReject(orsListId))">Reject</MudButton>
+        }
+        else if (UserRole == "Section Chief")
+        {
+            @if (CurrentTab == "For Review")
+            {
+                <MudButton Color="Color.Primary" OnClick="@(() => OnReview(orsListId))">Review</MudButton>
+            }
+            else if (CurrentTab == "For Approve")
+            {
+                <MudButton Color="Color.Success" OnClick="@(() => OnApprove(orsListId))">Approve</MudButton>
+            }
+        }
+        else
+        {
+            <MudText>No actions available (role not found)</MudText>
+        }
+    </DialogActions>
+
+</MudDialog>
+
+@code {
+    [Parameter] public byte[] PdfBytes { get; set; }
+    [Parameter] public int orsListId { get; set; }
+    [Parameter] public string CurrentTab { get; set; }
+
+    private string PdfDataUrl;
+    private string UserRole;
+
+    [CascadingParameter] IMudDialogInstance MudDialog { get; set; }
+
+    protected override async Task OnInitializedAsync()
+    {
+        var authState = await AuthProvider.GetAuthenticationStateAsync();
+        var user = authState.User;
+
+        if (user.Identity?.IsAuthenticated == true)
+        {
+            // Try multiple claim types (different identity providers use different ones)
+            UserRole = user.Claims.FirstOrDefault(c =>
+                c.Type == "role" ||
+                c.Type == "roles" ||
+                c.Type == ClaimTypes.Role || // from System.Security.Claims
+                c.Type == "http://schemas.microsoft.com/ws/2008/06/identity/claims/role"
+            )?.Value;
+        }
+    }
+
+    protected override void OnParametersSet()
+    {
+        if (PdfBytes != null && PdfBytes.Length > 0)
+        {
+            PdfDataUrl = $"data:application/pdf;base64,{Convert.ToBase64String(PdfBytes)}";
+        }
+    }
+
+    private void Close() => MudDialog.Close();
+
+    private async Task OnReview(int id)
+    {
+        var success = await OrsService.MarkReviewedByProcessorAsync(id);
+        if (success)
+        {
+            Snackbar.Add("Record marked as reviewed successfully.", Severity.Success);
+            Navigation.NavigateTo("/processor-dashboard", true);
+        }
+        else
+        {
+            Snackbar.Add("Failed to mark record as reviewed.", Severity.Error);
+        }
+    }
+
+    // private async Task OnApprove(int id)
+    // {
+    //     Snackbar.Add($"Record {id} approved.", Severity.Success);
+    //     MudDialog.Close();
+    // }
+
+    private async Task OnApprove(int id)
+    {
+        try
+        {
+            var success = await OrsService.MarkReviewedByBudgetOfficerIIAsync(id);
+
+            if (success)
+            {
+                Snackbar.Add("ORS record approved successfully!", Severity.Success);
+
+            }
+            else
+            {
+                Snackbar.Add("Failed to approve ORS record.", Severity.Error);
+            }
+        }
+        catch (Exception ex)
+        {
+            Snackbar.Add($"Error: {ex.Message}", Severity.Error);
+        }
+    }
+
+    private async Task OnReject(int id)
+    {
+        try
+        {
+            var success = await OrsService.MarkRejectedByBudgetOfficerIIAsync(id);
+
+            if (success)
+            {
+                Snackbar.Add("ORS record rejected successfully!", Severity.Success);
+            }
+            else
+            {
+                Snackbar.Add("Failed to reject ORS record.", Severity.Error);
+            }
+        }
+        catch (Exception ex)
+        {
+            Snackbar.Add($"Error: {ex.Message}", Severity.Error);
+        }
+    }
+
+}

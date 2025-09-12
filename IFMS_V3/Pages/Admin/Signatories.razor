@@ -1,0 +1,236 @@
+﻿@page "/Signatories"
+@using IFMS_V3.Models.User.Signatories
+@using IFMS_V3.Dialogs.User
+@using IFMS_V3.Services.Signatories
+@inject SignatoryService SignatoryService
+@inject Microsoft.AspNetCore.Components.Authorization.AuthenticationStateProvider AuthProvider
+@inject NavigationManager NavigationManager
+@inject ISnackbar Snackbar
+@inject IDialogService DialogService
+
+
+
+<MudContainer Class="mt-4 px-8" MaxWidth="MaxWidth.False">
+    <MudContainer Class="px-0" MaxWidth="MaxWidth.False">
+        <MudPaper>
+            <MudGrid Class="mb-4">
+                <!-- Search Box -->
+                <MudItem xs="12" sm="8">
+                    <MudTextField @bind-Value="_searchText"
+                                  Placeholder="Search"
+                                  Variant="Variant.Outlined"
+                                  Adornment="Adornment.Start"
+                                  AdornmentIcon="@Icons.Material.Filled.Search"
+                                  Immediate="true"
+                                  Class="w-100"
+                                  Style="border-radius: 8px;" />
+                </MudItem>
+
+                <!-- Add Signatory Button -->
+                <MudItem xs="6" sm="2" Class="d-flex justify-end">
+                    <MudButton Variant="Variant.Outlined"
+                               Color="Color.Primary"
+                               OnClick="@GoToAddSignatoryPage"
+                               Class="w-100">
+                        Add Signatory
+                    </MudButton>
+                </MudItem>
+            </MudGrid>
+        </MudPaper>
+
+        @if (isLoading)
+        {
+            <div class="d-flex justify-center mt-4">
+                <MudProgressCircular Color="Color.Primary" Size="Size.Large" Indeterminate="true" />
+            </div>
+        }
+        else
+        {
+            <!-- Table -->
+            <MudTable Items="FilteredRecords" Hover="true" Bordered="true" Striped="true">
+                <HeaderContent>
+                    <MudTh Style="text-align:center; background-color: midnightblue; color: white;">ID</MudTh>
+                    <MudTh Style="text-align:center; background-color: midnightblue; color: white;">Printed Name</MudTh>
+                    <MudTh Style="text-align:center; background-color: midnightblue; color: white;">Position</MudTh>
+                    <MudTh Style="text-align:center; background-color: midnightblue; color: white;">Status</MudTh>
+                    <MudTh Style="text-align:center; background-color: midnightblue; color: white;">Created At</MudTh>
+                    <MudTh Style="text-align:center; background-color: midnightblue; color: white;">Updated By</MudTh>
+                    <MudTh Style="text-align:center; background-color: midnightblue; color: white;">Actions</MudTh>
+                </HeaderContent>
+
+                <RowTemplate Context="sig">
+                    <MudTd Style="text-align:center">@sig.Id</MudTd>
+                    <MudTd Style="text-align:center">@sig.PrintedName</MudTd>
+                    <MudTd Style="text-align:center">@sig.Position</MudTd>
+                    <MudTd Style="text-align:center">@(sig.Disabled ? "Inactive" : "Active")</MudTd>
+                    <MudTd Style="text-align:center">@sig.CreatedAt.ToString("MM-dd-yyyy HH:mm")</MudTd>
+                    <MudTd Style="text-align:center">@(((sig.updatedByName?.ToString() ?? "N/A")))</MudTd>
+
+                    <MudTd>
+                        <!-- Enable / Disable -->
+                         <MudButton Variant="Variant.Outlined"
+                                   Color="@((sig.Disabled ? Color.Success : Color.Error))"
+                                   OnClick="() => ToggleSignatoryStatus(sig)"
+                                   Size="Size.Small"
+                                   Class="me-2">
+                            @(sig.Disabled ? "Enable" : "Disable")
+                        </MudButton>
+
+                        <MudButton Variant="Variant.Outlined"
+                                   Color="Color.Primary"
+                                   OnClick="() => EditSignatory(sig)"
+                                   Size="Size.Small">
+                            Edit
+                        </MudButton> 
+                    </MudTd>
+                </RowTemplate>
+            </MudTable>
+        }
+
+        <div class="d-flex justify-end my-4">
+            <MudPagination Variant="Variant.Filled"
+                           Count="@totalPages"
+                           Selected="@currentPage"
+                           SelectedChanged="OnPageChanged" />
+        </div>
+    </MudContainer>
+</MudContainer>
+
+@code {
+    private int totalRecords;
+    private int pageSize = 10;
+    private int currentPage = 1;
+    private int totalPages => (int)Math.Ceiling((double)totalRecords / pageSize);
+    private bool isLoading = false;
+
+    private string _searchText = "";
+
+    public List<SignatoriesModels> signatoryList { get; set; } = new();
+
+    private IEnumerable<SignatoriesModels> FilteredRecords =>
+        signatoryList
+            .Where(s =>
+                string.IsNullOrWhiteSpace(_searchText) ||
+                s.PrintedName.Contains(_searchText, StringComparison.OrdinalIgnoreCase) ||
+                s.Position.Contains(_searchText, StringComparison.OrdinalIgnoreCase));
+
+    protected override async Task OnInitializedAsync()
+    {
+        var authState = await AuthProvider.GetAuthenticationStateAsync();
+        var user = authState.User;
+
+        if (!user.Identity?.IsAuthenticated ?? true)
+        {
+            NavigationManager.NavigateTo("/", true);
+            return;
+        }
+
+        await LoadDataAsync();
+    }
+
+    private async Task OnPageChanged(int page)
+    {
+        currentPage = page;
+        await LoadDataAsync();
+    }
+
+    private void GoToAddSignatoryPage()
+    {
+        NavigationManager.NavigateTo("/signatories-registration");
+    }
+
+    private async Task ToggleSignatoryStatus(SignatoriesModels sig)
+    {
+        try
+        {
+            bool disable = !sig.Disabled;
+
+            await SignatoryService.UpdateUserStatusAsync(sig.Id, disable);
+
+            sig.Disabled = disable;
+
+            Snackbar.Add($"User {(disable ? "disabled" : "enabled")} successfully.", Severity.Success);
+        }
+        catch (Exception ex)
+        {
+            Snackbar.Add($"Failed to update user status: {ex.Message}", Severity.Error);
+        }
+    }
+    // private async Task LoadDataAsync()
+    // {
+    //     try
+    //     {
+    //         isLoading = true;
+    //         StateHasChanged();
+
+    //         var response = await SignatoryService.GetSignatoriesAsync(currentPage, pageSize);
+
+    //         if (response != null && response.Status == "SUCCESS" && response.Data != null)
+    //         {
+    //             signatoryList = response.Data.SignatoryList ?? new List<SignatoriesModels>();
+    //             totalRecords = response.Data.TotalRecords;
+    //         }
+    //         else
+    //         {
+    //             signatoryList = new List<SignatoriesModels>();
+    //             totalRecords = 0;
+    //             Snackbar.Add("Failed to fetch signatories.", Severity.Error);
+    //         }
+    //     }
+    //     finally
+    //     {
+    //         isLoading = false;
+    //         StateHasChanged();
+    //     }
+    // }
+    private async Task LoadDataAsync()
+    {
+        try
+        {
+            isLoading = true;
+            Console.WriteLine("🔄 Fetching signatories...");
+            StateHasChanged();
+
+            var response = await SignatoryService.GetSignatoriesAsync(currentPage, pageSize);
+
+            if (response != null && response.Status == "SUCCESS" && response.Data != null)
+            {
+                Console.WriteLine($"✅ Got {response.Data.SignatoryList?.Count} records");
+                signatoryList = response.Data.SignatoryList ?? new List<SignatoriesModels>();
+                totalRecords = response.Data.TotalRecords;
+            }
+            else
+            {
+                Console.WriteLine("⚠️ Failed response or null data");
+                signatoryList = new List<SignatoriesModels>();
+                totalRecords = 0;
+                Snackbar.Add("Failed to fetch signatories.", Severity.Error);
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"❌ LoadDataAsync failed: {ex.Message}");
+        }
+        finally
+        {
+            isLoading = false;
+            StateHasChanged();
+        }
+    }
+    private async Task EditSignatory(SignatoriesModels sig)
+    {
+        var parameters = new DialogParameters { ["SignatoryToEdit"] = sig };
+        var options = new DialogOptions { CloseButton = true, MaxWidth = MaxWidth.Small, FullWidth = true };
+
+        var dialog = await DialogService.ShowAsync<SignatoryDialog>("Edit Signatory", parameters, options);
+        var result = await dialog.Result;
+
+        if (!result.Canceled && result.Data is SignatoriesModels updatedSignatory)
+        {
+            var index = signatoryList.FindIndex(s => s.Id == updatedSignatory.Id);
+            if (index != -1) signatoryList[index] = updatedSignatory;
+            StateHasChanged();
+        }
+    }
+
+}

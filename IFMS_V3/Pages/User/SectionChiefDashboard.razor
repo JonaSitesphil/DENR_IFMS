@@ -1,0 +1,269 @@
+﻿@page "/section-chief-dashboard"
+@layout SectionChiefLayout
+@using IFMS_V3.Dialogs.Template
+@inject IDialogService DialogService
+@using IFMS_V3.Models.Ors
+@using IFMS_V3.Models.Ors.SectionChiefModel
+@inject IFMS_V3.Services.Ors.OrsService OrsService
+@inject AuthenticationStateProvider AuthProvider
+@using Microsoft.AspNetCore.Components.Authorization
+@inject NavigationManager Navigation
+@inject ISnackbar Snackbar
+@using IFMS_V3.Dialogs.Ors
+@using IFMS_V3.Services.Pdf
+@inject IDialogService _dialogService
+@inject HttpClient Http
+
+
+<MudContainer Class="mt-4 px-8" MaxWidth="MaxWidth.False">
+    <MudContainer Class="px-0" MaxWidth="MaxWidth.False">
+        <MudPaper>
+            <MudGrid Class="mb-4">
+                <MudItem xs="12" sm="8">
+                    <MudTextField @bind-Value="_searchText"
+                                  Placeholder="Search"
+                                  Variant="Variant.Outlined"
+                                  Adornment="Adornment.Start"
+                                  AdornmentIcon="@Icons.Material.Filled.Search"
+                                  Immediate="true"
+                                  Class="w-100"
+                                  Style="border-radius: 8px;" />
+                </MudItem>
+                <MudItem xs="6" sm="2" Class="d-flex justify-end">
+                    <MudSelect T="string"
+                               Value="@_selectedFilter"
+                               ValueChanged="OnOptionChanged"
+                               Class="w-100"
+                               Color="Color.Primary"
+                               Variant="Variant.Outlined"
+                               Dense="true">
+                        <MudSelectItem Value="@("Default")">Default</MudSelectItem>
+                        <MudSelectItem Value="@("Ors")">ORS</MudSelectItem>
+                        <MudSelectItem Value="@("Burs")">BURS</MudSelectItem>
+                        <MudSelectItem Value="@("Norsa")">NORSA</MudSelectItem>
+                    </MudSelect>
+                </MudItem>
+                <MudItem xs="6" sm="2" Class="d-flex justify-end">
+                    <MudButton Variant="Variant.Outlined"
+                               Color="Color.Primary"
+                               OnClick="RefreshTable"
+                               Class="w-100">
+                        Refresh
+                    </MudButton>
+                </MudItem>
+            </MudGrid>
+
+            <MudTabs Elevation="2"
+                     Rounded="true"
+                     ApplyEffectsToContainer="true"
+                     PanelClass="pa-6"
+                     OnActivePanelIndexChanged="OnTabChanged">
+
+                <!-- TAB 1: For Review -->
+                <MudTabPanel Text="For Review">
+                    @if (orsListB == null)
+                    {
+                        <MudProgressCircular Indeterminate="true" Color="Color.Primary" />
+                    }
+                    else
+                    {
+                        <MudTable Items="orsListB" Hover="true" Striped="true" Bordered="true">
+                            <HeaderContent>
+                                <MudTh Style="text-align:center; padding: 1rem 8px; background-color: midnightblue; color: white;">Payee</MudTh>
+                                <MudTh Style="text-align:center; padding: 1rem 8px; background-color: midnightblue; color: white;">Transaction ID</MudTh>
+                                <MudTh Style="text-align:center; padding: 1rem 8px; background-color: midnightblue; color: white;">Amount</MudTh>
+                                <MudTh Style="text-align:center; padding: 1rem 8px; background-color: midnightblue; color: white;">Type</MudTh>
+                                <MudTh Style="text-align:center; padding: 1rem 8px; background-color: midnightblue; color: white;">Status</MudTh>
+                                <MudTh Style="text-align:center; padding: 1rem 8px; background-color: midnightblue; color: white;">Actions</MudTh>
+                            </HeaderContent>
+                            <RowTemplate Context="record">
+                                <MudTd>@record.Payee</MudTd>
+                                <MudTd>@record.Id</MudTd>
+                                <MudTd>@record.Amount</MudTd>
+                                <MudTd>@record.Type</MudTd>
+                                <MudTd>@record.Status</MudTd>
+                                <MudTd>
+                                    <MudButton Variant="Variant.Outlined" Color="Color.Primary"
+                                               OnClick="@(() => OpenPdf(record.Id))">
+                                        Review
+                                    </MudButton>
+                                </MudTd>
+                            </RowTemplate>
+                        </MudTable>
+                    }
+                </MudTabPanel>
+
+                <!-- TAB 2: For Approve -->
+                <MudTabPanel Text="For Approval">
+                    @if (orsListA == null)
+                    {
+                        <MudProgressCircular Indeterminate="true" Color="Color.Primary" />
+                    }
+                    else
+                    {
+                        <MudTable Items="FilteredRecords" Hover="true" Striped="true" Bordered="true">
+                            <HeaderContent>
+                                <MudTh Style="text-align:center; padding: 1rem 8px; background-color: midnightblue; color: white;">Payee</MudTh>
+                                <MudTh Style="text-align:center; padding: 1rem 8px; background-color: midnightblue; color: white;">Transaction ID</MudTh>
+                                <MudTh Style="text-align:center; padding: 1rem 8px; background-color: midnightblue; color: white;">Amount</MudTh>
+                                <MudTh Style="text-align:center; padding: 1rem 8px; background-color: midnightblue; color: white;">Type</MudTh>
+                                <MudTh Style="text-align:center; padding: 1rem 8px; background-color: midnightblue; color: white;">Status</MudTh>
+                                <MudTh Style="text-align:center; padding: 1rem 8px; background-color: midnightblue; color: white;">Actions</MudTh>
+                            </HeaderContent>
+                            <RowTemplate Context="record">
+                                <MudTd>@record.Payee</MudTd>
+                                <MudTd>@record.Id</MudTd>
+                                <MudTd>@record.Amount</MudTd>
+                                <MudTd>@record.Type</MudTd>
+                                <MudTd>@record.Status</MudTd>
+                                <MudTd>
+                                    <MudButton Variant="Variant.Outlined" Color="Color.Primary"
+                                               OnClick="@(() => OpenPdf(record.Id))">
+                                        Review
+                                    </MudButton>
+                                </MudTd>
+                            </RowTemplate>
+                        </MudTable>
+                    }
+                </MudTabPanel>
+            </MudTabs>
+
+        </MudPaper>
+    </MudContainer>
+</MudContainer>
+
+
+@code {
+    private string _searchText = "";
+    private string _selectedFilter = "Default";
+
+    private List<SectionChiefModel.SectionChiefDashboardModel> orsListA = new();
+    private List<SectionChiefModel.SectionChiefDashboardModel> orsListB = new();
+
+    private IEnumerable<SectionChiefModel.SectionChiefDashboardModel> FilteredRecords =>
+        orsListA.Where(r =>
+            (_selectedFilter == "Default" ||
+             (r.Type?.Equals(_selectedFilter, StringComparison.OrdinalIgnoreCase) ?? false))
+            &&
+            (string.IsNullOrWhiteSpace(_searchText) ||
+             r.Payee.Contains(_searchText, StringComparison.OrdinalIgnoreCase))
+        );
+    // private IEnumerable<SectionChiefModel.SectionChiefDashboardModel> FilteredRecords =>
+    //    orsList?.Where(r => string.IsNullOrWhiteSpace(_searchText) ||
+    //                        r.Payee.Contains(_searchText, StringComparison.OrdinalIgnoreCase)) ?? Enumerable.Empty<SectionChiefModel.SectionChiefDashboardModel>();
+
+    private IEnumerable<SectionChiefModel.SectionChiefDashboardModel> FilteredForReview =>
+    orsListB?.Where(r => string.IsNullOrWhiteSpace(_searchText) ||
+                              r.Payee.Contains(_searchText, StringComparison.OrdinalIgnoreCase)) ?? Enumerable.Empty<SectionChiefModel.SectionChiefDashboardModel>();
+
+    private async Task OnOptionChanged(string value)
+    {
+        _selectedFilter = value;
+        await InvokeAsync(StateHasChanged);
+    }
+
+    private void RefreshTable()
+    {
+        _searchText = "";
+        _selectedFilter = "Default";
+        StateHasChanged();
+    }
+
+    protected override async Task OnInitializedAsync()
+    {
+        var authState = await AuthProvider.GetAuthenticationStateAsync();
+        var user = authState.User;
+
+        if (!user.Identity.IsAuthenticated)
+        {
+            Navigation.NavigateTo("/", true);
+            return;
+        }
+
+        try
+        {
+            orsListA = await OrsService.GetAllForSectionChiefAsync();
+            orsListB = await OrsService.GetAllForReviewAsync();
+        
+        }
+        catch (Exception ex)
+        {
+            Snackbar.Add($"Failed to load dashboard data. {ex.Message}", Severity.Error);
+            orsListA = new List<SectionChiefModel.SectionChiefDashboardModel>();
+            orsListB = new List<SectionChiefModel.SectionChiefDashboardModel>();
+
+
+        }
+    }
+    private async Task OpenPdf(int recordId)
+    {
+        // Find the record in orsList
+        var record = orsListA.FirstOrDefault(r => r.Id == recordId)
+          ?? orsListB.FirstOrDefault(r => r.Id == recordId);
+
+
+        if (record == null)
+        {
+            Snackbar.Add("Record not found.", Severity.Error);
+            return;
+        }
+
+        // ✅ Map BudgetOfficerDashboard → OrsModel
+        var orsModel = new OrsModel
+        {
+            Ors_Id = record.Id,
+            OrsNumber = record.OrsNumber,
+            OrsDate = record.OrsDate,
+            FundCodeId = record.FundCodeId,
+            FundClusterId = record.FundClusterId,
+            Payee = record.Payee,
+            Office = record.Office,
+            Address = record.Address,
+            Particulars = record.Particulars,
+            ResponsibilityCenterId = record.ResponsibilityCenterId,
+            // ResponsibilityCenterName = record.ResponsibilityCenterName,
+            MfoPapId = record.MfoPapId,
+            UacsCodeId = record.UacsCodeId,
+            Amount = record.Amount,
+            Total = record.Total,
+            SignatoryA = record.SignatoryA,
+            PositionA = record.PositionA,
+            SignatoryB = record.SignatoryB,
+            PositionB = record.PositionB,
+            responsibilityCenterName = record.responsibilityCenterName,   
+            fundCodeName = record.fundCodeName,                           
+            fundClusterName = record.fundClusterName,                     
+            mfoPapName = record.mfoPapName,                               
+            uacsCodeName = record.uacsCodeName,
+            // Status = record.Status
+        };
+
+        // ✅ Generate PDF
+        var generator = new ORSPdfMock(Http);
+        var pdfBytes = await generator.GenerateORSAsync(orsModel);
+
+        // ✅ Open in MudDialog
+        var parameters = new DialogParameters
+        {
+            ["PdfBytes"] = pdfBytes,
+            ["orsListId"] = record.Id,   // int
+            ["CurrentTab"] = CurrentTab  // string
+        };
+
+
+        var options = new DialogOptions
+        {
+            MaxWidth = MaxWidth.ExtraLarge,
+            FullWidth = true
+        };
+
+        _dialogService.Show<PdfDialog>("ORS PDF Preview", parameters, options);
+    }
+    private string CurrentTab = "For Review"; // default
+
+    private void OnTabChanged(int index)
+    {
+        CurrentTab = index == 0 ? "For Review" : "For Approve";
+    }
+
+}

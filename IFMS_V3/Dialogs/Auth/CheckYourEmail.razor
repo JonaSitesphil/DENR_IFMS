@@ -1,0 +1,18 @@
+﻿@inject IDialogService DialogService
+
+<MudText Typo="Typo.h6" Align="Align.Center">
+    Check your email to get the OTP.
+</MudText>
+
+<MudButton @onclick="OpenDialogAsync" Variant="Variant.Filled" Color="Color.Primary">
+    done
+</MudButton>
+@code {
+
+    private Task OpenDialogAsync()
+    {
+        var options = new DialogOptions { CloseOnEscapeKey = true };
+
+        return DialogService.ShowAsync<ResetPassword>("CheckYourEmail", options);
+    }
+}

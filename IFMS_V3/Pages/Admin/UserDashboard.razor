@@ -1,0 +1,222 @@
+﻿@page "/user-management"              
+@layout MainLayout              
+@using Dialogs.User
+@using IFMS_V3.Models.User.UserManagement       
+@inject Microsoft.AspNetCore.Components.Authorization.AuthenticationStateProvider AuthProvider 
+@inject NavigationManager NavigationManager 
+@inject ISnackbar Snackbar              
+@inject IFMS_V3.Services.User.UserService UserService
+@using MudBlazor                       
+@inject IDialogService DialogService    
+
+<MudContainer Class="mt-4 px-8" MaxWidth="MaxWidth.False">
+    <MudContainer Class="px-0" MaxWidth="MaxWidth.False">
+        <MudPaper>
+            <MudGrid Class="mb-4">
+                <!-- Search Box -->
+                <MudItem xs="12" sm="8">
+                    <MudTextField @bind-Value="_searchText"
+                                  Placeholder="Search"
+                                  Variant="Variant.Outlined"
+                                  Adornment="Adornment.Start"
+                                  AdornmentIcon="@Icons.Material.Filled.Search"
+                                  Immediate="true"
+                                  Class="w-100"
+                                  Style="border-radius: 8px;" />
+                </MudItem>
+
+                <!-- Add User Button -->
+                <MudItem xs="6" sm="2" Class="d-flex justify-end">
+                    <MudButton Variant="Variant.Outlined"
+                               Color="Color.Primary"
+                               OnClick="@GoToAddUserPage"
+                               Class="w-100">
+                        Add User
+                    </MudButton>
+                </MudItem>
+            </MudGrid>
+        </MudPaper>
+        @if (isLoading)
+        {
+            <div class="d-flex justify-center mt-4">
+                <MudProgressCircular Color="Color.Primary" Size="Size.Large" Indeterminate="true" />
+            </div>
+        }
+        else
+        {
+        <!-- User Table -->
+        <MudTable Items="FilteredRecords" Hover="true" Bordered="true" Striped="true">
+            <HeaderContent>
+                <!-- Table Headers -->
+                <MudTh Style="text-align:center; padding: 1rem 8px; background-color: midnightblue; color: white;">First Name</MudTh>
+                <MudTh Style="text-align:center; padding: 1rem 8px; background-color: midnightblue; color: white;">Last Name </MudTh>
+                <MudTh Style="text-align:center; padding: 1rem 8px; background-color: midnightblue; color: white;">Email</MudTh>
+                <MudTh Style="text-align:center; padding: 1rem 8px; background-color: midnightblue; color: white;">Role</MudTh>
+                <MudTh Style="text-align:center; padding: 1rem 8px; background-color: midnightblue; color: white;">Status</MudTh>
+                <MudTh Style="text-align:center; padding: 1rem 8px; background-color: midnightblue; color: white;">Created At</MudTh>
+                <MudTh Style="text-align:center; padding: 1rem 8px; background-color: midnightblue; color: white;">Updated By</MudTh>
+                <MudTh Style="text-align:center; padding: 1rem 8px; background-color: midnightblue; color: white;">Actions</MudTh>
+            </HeaderContent>
+
+            <RowTemplate Context="user">
+                <!-- Row Data -->
+                <MudTd>@user.FirstName</MudTd>
+                <MudTd>@user.LastName</MudTd>
+                <MudTd>@user.Email</MudTd>
+                <MudTd>@user.Role</MudTd>
+                <MudTd>@(user.Disabled ? "Inactive" : "Active")</MudTd>
+                <MudTd>@user.CreatedAt.ToString("MM-dd-yyyy HH:mm")</MudTd>
+                    <MudTd>@(user.updatedByName?.ToString() ?? "N/A")</MudTd>
+                <MudTd>
+                    <!-- Enable / Disable Button -->
+                    <MudButton Variant="Variant.Outlined"
+                               Color="@((user.Disabled ? Color.Success : Color.Error))"
+                               OnClick="() => ToggleUserStatus(user)"
+                               Size="Size.Small"
+                               Class="me-2">
+                        @(user.Disabled ? "Enable" : "Disable")
+                    </MudButton>
+
+                    <!-- Edit Button -->
+                    <MudButton Variant="Variant.Outlined"
+                               Color="Color.Primary"
+                               OnClick="() => EditUser(user)"
+                               Size="Size.Small">
+                        Edit
+                    </MudButton>
+                </MudTd>
+            </RowTemplate>
+        </MudTable>
+        }
+
+        <div class="d-flex justify-end my-4">
+            <MudPagination Variant="Variant.Filled"
+                           Count="@totalPages"
+                           Selected="@currentPage"
+                           SelectedChanged="OnPageChanged" />
+        </div>
+
+    </MudContainer>
+</MudContainer>
+
+@code {
+    private int totalRecords;
+    private int pageSize = 10; // number of items per page
+    private int currentPage = 1;
+    private int totalPages => (int)Math.Ceiling((double)totalRecords / pageSize);
+    bool isLoading = false;
+
+    // Search filter text
+    private string _searchText = "";
+
+    // Holds full list of users fetched from API
+    public List<UserModel> UserList { get; set; } = new();
+
+    // Filtered users (by role and search text)4
+    private IEnumerable<UserModel> FilteredRecords =>
+        UserList
+            .Where(r =>
+                (string.IsNullOrWhiteSpace(_searchText) ||
+                 r.FirstName.Contains(_searchText, StringComparison.OrdinalIgnoreCase) ||
+                 r.LastName.Contains(_searchText, StringComparison.OrdinalIgnoreCase) ||
+                 r.Email.Contains(_searchText, StringComparison.OrdinalIgnoreCase))
+            );
+
+    private async Task LoadDataAsync()
+    {
+        var response = await UserService.GetUsermanagementDataAsync(currentPage, pageSize);
+
+        if (response != null)
+        {
+            totalRecords = response.Data.TotalRecords;
+            UserList = response.Data?.UserList ?? new List<UserModel>();
+        }
+        else
+        {
+            totalRecords = 0;
+            UserList = new List<UserModel>();
+        }
+    }
+
+    // Runs when component loads
+    protected override async Task OnInitializedAsync()
+    {
+        var authState = await AuthProvider.GetAuthenticationStateAsync();
+        var user = authState.User;
+
+        // Redirect to login if not authenticated
+        if (!user.Identity?.IsAuthenticated ?? true)
+        {
+            NavigationManager.NavigateTo("/", true);
+            return;
+        }
+
+        try
+        {
+            await LoadDataAsync(); // ✅ only call this once
+            Console.WriteLine("total records = " + totalRecords);
+            Console.WriteLine("total pages = " + totalPages);
+        }
+        catch
+        {
+            UserList = new List<UserModel>();
+            totalRecords = 0;
+        }
+    }
+
+
+    private async Task OnPageChanged(int page)
+    {
+        isLoading = true;
+        StateHasChanged(); // refresh UI to show loader
+
+        currentPage = page;
+        await LoadDataAsync();
+
+        isLoading = false;
+        StateHasChanged(); // refresh UI to hide loader
+    }
+
+    // Navigate to Add User page
+    private void GoToAddUserPage()
+    {
+        NavigationManager.NavigateTo("/user-registration");
+    }
+
+    // Enable/Disable user
+    private async Task ToggleUserStatus(UserModel user)
+    {
+        try
+        {
+            bool disable = !user.Disabled;
+
+            await UserService.UpdateUserStatusAsync(user.Id, disable);
+
+            user.Disabled = disable;
+
+            Snackbar.Add($"User {(disable ? "disabled" : "enabled")} successfully.", Severity.Success);
+        }
+        catch (Exception ex)
+        {
+            Snackbar.Add($"Failed to update user status: {ex.Message}", Severity.Error);
+        }
+    }
+
+    private async Task EditUser(UserModel user)
+    {
+        var parameters = new DialogParameters { ["UserToEdit"] = user };
+        var options = new DialogOptions { CloseButton = true, MaxWidth = MaxWidth.Small, FullWidth = true };
+
+        var dialog = await DialogService.ShowAsync<UserManagementDialog>("Edit User", parameters, options);
+        var result = await dialog.Result;
+
+        if (!result.Canceled && result.Data is UserModel updatedUser)
+        {
+            var index = UserList.FindIndex(u => u.Id == updatedUser.Id);
+            if (index != -1)
+                UserList[index] = updatedUser;
+
+            StateHasChanged();
+        }
+    }
+}

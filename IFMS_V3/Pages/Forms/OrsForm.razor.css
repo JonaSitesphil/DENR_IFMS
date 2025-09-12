@@ -1,0 +1,27 @@
+﻿.ors-form-container {
+    max-width: 900px; /* Keeps it centered and not too wide */
+    margin: auto;
+    padding: 20px 30px;
+    background-color: white;
+    border-radius: 8px;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.4);
+}
+
+/* Make the grid inputs fit naturally without too much height */
+.mud-grid {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 16px;
+}
+
+/* Ensure each input stretches to fill its column */
+.mud-item {
+    width: 100%;
+}
+
+/* Slight adjustment for side-by-side fields on larger screens */
+@media (min-width: 600px) {
+    .mud-item-half {
+        width: calc(50% - 8px);
+    }
+}

@@ -1,0 +1,257 @@
+﻿@page "/norsa"
+@using MudBlazor
+@using IFMS_V3.Models.Norsa
+@using IFMS_V3.Dto.Norsa
+@inject ISnackbar Snackbar
+@using System.Text.Json
+@using static IFMS_V3.Models.Norsa.NorsaModel
+@inject NavigationManager NavigationManager
+@inject IFMS_V3.Services.Norsa.NorsaService NorsaService
+
+<MudPaper Class="p-6 mx-auto mt-6" Style="max-width: 900px;">
+    <MudForm @ref="mudForm" Model="norsaForm">
+        <MudGrid GutterSize="16px">
+
+            <MudItem xs="12" Class="text-center">
+                <MudText Typo="Typo.h6" Class="font-bold">NOTICE OF OBLIGATION REQUEST AND STATUS ADJUSTMENT</MudText>
+                <MudText Typo="Typo.subtitle2">DENR - CO</MudText>
+            </MudItem>
+
+            <MudItem xs="4">
+                <MudTextField T="string" @bind-Value="norsaForm.SerialNo" Label="Serial No." Required="true" />
+            </MudItem>
+
+            <MudItem xs="4">
+                <MudDatePicker T="DateTime?" @bind-Date="norsaForm.Date" Label="Date" Required="true" />
+            </MudItem>
+
+            <MudItem xs="12" sm="6">
+                <MudSelect T="int?" @bind-Value="norsaForm.ResponsibilityCenterId" Label="Responsibility Center" Virtualize="true" OnScrollToBottom="LoadMoreResponsibilityCenters">
+                    <MudSelectItem T="int?" Value="null" Disabled="true">Select</MudSelectItem>
+                    @foreach (var rc in responsibilityCenters)
+                    {
+                        <MudSelectItem T="int?" Value="@rc.id">@($"{rc.rcCode} - {rc.rcName}")</MudSelectItem>
+                    }
+                    @if (rcIsLoading)
+                    {
+                        <MudSelectItem T="int?" Disabled="true">Loading...</MudSelectItem>
+                    }
+                </MudSelect>
+            </MudItem>
+
+            <MudItem xs="12">
+                <MudTextField T="string" @bind-Value="norsaForm.Particulars" Label="Particulars" Lines="4" TextArea="true" Required="true" />
+            </MudItem>
+
+            <MudItem xs="12" sm="6">
+                <MudSelect T="int" Label="MFO/PAP" @bind-Value="norsaForm.MfoPapId"
+                           Required="true" Virtualize="true" OnScrollToBottom="LoadMoreMFOPAPs">
+                    <MudSelectItem T="int" Value="0" Disabled="true">Select</MudSelectItem>
+                    @foreach (var mfo in mfopaps)
+                    {
+                        <MudSelectItem T="int" Value="@mfo.id">@($"{mfo.mfoPapCode} - {mfo.mfoPapDescription}")</MudSelectItem>
+                    }
+                    @if (mfoIsLoading)
+                    {
+                        <MudSelectItem T="int" Disabled="true">Loading...</MudSelectItem>
+                    }
+                </MudSelect>
+            </MudItem>
+
+            <MudItem xs="12" sm="6">
+                <MudSelect T="int?" @bind-Value="norsaForm.UacsCodeId" Label="UACS Code" Virtualize="true" OnScrollToBottom="LoadMoreUACS">
+                    <MudSelectItem T="int?" Value="null" Disabled="true">Select</MudSelectItem>
+                    @foreach (var uac in uacs)
+                    {
+                        <MudSelectItem T="int?" Value="@uac.id">@($"{uac.subObjectCode} - {uac.uacs}")</MudSelectItem>
+                    }
+                    @if (uacsIsLoading)
+                    {
+                        <MudSelectItem T="int?" Disabled="true">Loading...</MudSelectItem>
+                    }
+                </MudSelect>
+            </MudItem>
+
+            <!-- Amount -->
+            <MudItem xs="12" sm="6">
+                <MudNumericField T="double" @bind-Value="norsaForm.Amount" Label="Amount" Min="0.01" Required="true" />
+            </MudItem>
+
+            <!-- JEV Number (model property is int) -->
+            <MudItem xs="12" sm="6">
+                <MudTextField T="int" @bind-Value="norsaForm.JevNumber" Label="JEV Number" Required="true" />
+            </MudItem>
+
+            @* <!-- JEV Date (model property is non-nullable DateTime) -->
+            <MudItem xs="12" sm="6">
+                <MudDatePicker T="DateTime?" DateChanged="@(e => norsaForm.JevDate = e)" Date="@norsaForm.JevDate" Label="JEV Date" Required="true" />
+            </MudItem> *@
+
+            <MudItem xs="12" Class="d-flex justify-end">
+                <MudButton Variant="Variant.Outlined" Color="Color.Secondary" OnClick="CancelForm" Class="me-2">Cancel</MudButton>
+                <MudButton Variant="Variant.Filled" Color="Color.Primary" Disabled="isLoading" Loading="@isLoading" OnClick="SubmitForm">Submit</MudButton>
+            </MudItem>
+        </MudGrid>
+    </MudForm>
+</MudPaper>
+
+@code {
+    private MudForm mudForm;
+    private NorsaModel norsaForm = new();
+    private bool isLoading = false;
+
+    private const int PageSize = 10;
+
+    private List<NorsaModel.ResponsibilityCenter> responsibilityCenters = new();
+    private int rcPage = 1; private bool rcIsLoading = false; private bool rcHasMore = true;
+
+    private List<NorsaModel.MFOPAP> mfopaps = new();
+    private int mfoPage = 1; private bool mfoIsLoading = false; private bool mfoHasMore = true;
+
+    private List<NorsaModel.UACS> uacs = new();
+    private int uacsPage = 1; private bool uacsIsLoading = false; private bool uacsHasMore = true;
+
+    protected override async Task OnInitializedAsync()
+    {
+        // preload first page for each dropdown
+        await LoadMoreResponsibilityCenters();
+        await LoadMoreMFOPAPs();
+        await LoadMoreUACS();
+
+        // optional: set default RC to 0 (placeholder "Select")
+        norsaForm.ResponsibilityCenterId = 0;
+    }
+
+    private async Task LoadMoreResponsibilityCenters()
+    {
+        if (rcIsLoading || !rcHasMore) return;
+        rcIsLoading = true;
+        var result = await NorsaService.GetResponsibilityCenters(rcPage, PageSize);
+        if (result?.Any() == true)
+        {
+            // Map ORS model -> NorsaModel nested class
+            responsibilityCenters.AddRange(
+                result.Select(rc => new NorsaModel.ResponsibilityCenter
+                {
+                    id = rc.id,
+                    rcCode = rc.rcCode,
+                    rcName = rc.rcName
+                })
+            );
+            rcPage++;
+        }
+        else
+        {
+            rcHasMore = false;
+        }
+        rcIsLoading = false;
+    }
+
+    private async Task LoadMoreMFOPAPs()
+    {
+        if (mfoIsLoading || !mfoHasMore) return;
+        mfoIsLoading = true;
+        var result = await NorsaService.GetMFOPAPs(mfoPage, PageSize);
+        if (result?.Any() == true)
+        {
+            // Map ORS model -> NorsaModel nested class
+            mfopaps.AddRange(
+                result.Select(m => new NorsaModel.MFOPAP
+                {
+                    id = m.id,
+                    mfoPapCode = m.mfoPapCode,
+                    mfoPapDescription = m.mfoPapDescription
+                })
+            );
+            mfoPage++;
+        }
+        else
+        {
+            mfoHasMore = false;
+        }
+        mfoIsLoading = false;
+    }
+
+    private async Task LoadMoreUACS()
+    {
+        if (uacsIsLoading || !uacsHasMore) return;
+        uacsIsLoading = true;
+        var result = await NorsaService.GetUACS(uacsPage, PageSize);
+        if (result?.Any() == true)
+        {
+            // Map ORS model -> NorsaModel nested class
+            uacs.AddRange(
+                result.Select(u => new NorsaModel.UACS
+                {
+                    id = u.id,
+                    subObjectCode = u.subObjectCode,
+                    uacs = u.uacs
+                })
+            );
+            uacsPage++;
+        }
+        else
+        {
+            uacsHasMore = false;
+        }
+        uacsIsLoading = false;
+    }
+
+   private async Task SubmitForm()
+    {
+        await mudForm.Validate();
+        if (!mudForm.IsValid)
+        {
+            Snackbar.Add("Please fix form errors.", Severity.Warning);
+            return;
+        }
+
+        isLoading = true;
+        try
+        {
+            var result = await NorsaService.CreateNorsaAsync(norsaForm);
+
+            if (result.Status == "SUCCESS")
+            {
+                Snackbar.Add("NORSA successfully submitted.", Severity.Success);
+                NavigationManager.NavigateTo("/admin-budgetmanagement");
+            }
+            else
+            {
+                try
+                {
+                    var errorDetails = JsonSerializer.Deserialize<NorsaValidationError>(
+              result.Message,
+              new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
+
+                    if (errorDetails?.Errors != null)
+                    {
+                        foreach (var field in errorDetails.Errors)
+                            foreach (var msg in field.Value)
+                                Snackbar.Add(msg, Severity.Error);
+                    }
+                    else
+                    {
+                        Snackbar.Add($"Failed to create NORSA: {result.Message}", Severity.Error);
+                    }
+                }
+                catch
+                {
+                    Snackbar.Add($"Failed to create NORSA: {result.Message}", Severity.Error);
+                }
+            }
+        }
+        catch (Exception ex)
+        {
+            Snackbar.Add($"Error submitting NORSA: {ex.Message}", Severity.Error);
+        }
+        finally
+        {
+            isLoading = false;
+        }
+    }
+    private void CancelForm()
+    {
+        NavigationManager.NavigateTo("/admin-budgetmanagement");
+    }
+}

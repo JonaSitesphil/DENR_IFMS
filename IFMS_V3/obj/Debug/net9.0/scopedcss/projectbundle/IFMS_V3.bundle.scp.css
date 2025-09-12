@@ -1,0 +1,758 @@
+/* /Layout/AssistantDivisionChiefLayout.razor.rz.scp.css */
+.header-container[b-fgvoi79xw9] {
+    /*position: sticky;*/ /* or use 'fixed' if you want it always visible */
+    top: 0;
+    z-index: 1000; /* ensure it stays on top of other elements */
+    display: flex;
+    flex-direction: column;
+    font-family: Arial, sans-serif;
+    background-color: white; /* optional: to prevent transparency overlap */
+}
+
+.main-content[b-fgvoi79xw9] {
+    flex: 1;
+    padding: 16px;
+    overflow: auto;
+}
+
+    .main-content.shifted[b-fgvoi79xw9] {
+        margin-left: 240px;
+    }
+
+    .main-content.expanded[b-fgvoi79xw9] {
+        margin-left: 60px;
+    }
+
+.top-header[b-fgvoi79xw9] {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 12px 16px;
+    background-color: white;
+}
+
+.left-section[b-fgvoi79xw9] {
+    display: flex;
+    align-items: center;
+}
+
+.logo[b-fgvoi79xw9] {
+    height: 50px;
+    margin-right: 16px;
+}
+
+.agency-text[b-fgvoi79xw9] {
+    display: flex;
+    flex-direction: column;
+}
+
+.republic[b-fgvoi79xw9] {
+    font-size: 14px;
+}
+
+.agency-name[b-fgvoi79xw9] {
+    font-weight: bold;
+    font-size: 16px;
+    text-decoration: underline;
+}
+
+.agency-tagline[b-fgvoi79xw9] {
+    font-size: 14px;
+}
+
+.right-section[b-fgvoi79xw9] {
+    margin-left: 40%;
+    width: auto;
+}
+
+.time-text[b-fgvoi79xw9] {
+    text-align: right;
+    font-size: 14px;
+}
+
+.bagong-logo[b-fgvoi79xw9] {
+    height: 60px;
+    margin-right: 20%;
+}
+
+.time-label[b-fgvoi79xw9] {
+}
+
+.header-main[b-fgvoi79xw9] {
+    top: unset;
+    position: relative;
+}
+
+.custom-overlay[b-fgvoi79xw9] {
+    position: fixed;
+    top: 64px; /* Height of the AppBar */
+    left: 0;
+    width: 100%;
+    height: calc(100% - 64px);
+    background-color: rgba(0, 0, 0, 0.4);
+    z-index: 1100; /* Just below MudDrawer z-index */
+}
+/* /Layout/BudgetOfficerLayout.razor.rz.scp.css */
+.header-container[b-74jrswsrsj] {
+    /*position: sticky;*/ /* or use 'fixed' if you want it always visible */
+    top: 0;
+    z-index: 1000; /* ensure it stays on top of other elements */
+    display: flex;
+    flex-direction: column;
+    font-family: Arial, sans-serif;
+    background-color: white; /* optional: to prevent transparency overlap */
+}
+
+.main-content[b-74jrswsrsj] {
+    flex: 1;
+    padding: 16px;
+    overflow: auto;
+}
+
+    .main-content.shifted[b-74jrswsrsj] {
+        margin-left: 240px;
+    }
+
+    .main-content.expanded[b-74jrswsrsj] {
+        margin-left: 60px;
+    }
+
+.top-header[b-74jrswsrsj] {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 12px 16px;
+    background-color: white;
+}
+
+.left-section[b-74jrswsrsj] {
+    display: flex;
+    align-items: center;
+}
+
+.logo[b-74jrswsrsj] {
+    height: 50px;
+    margin-right: 16px;
+}
+
+.agency-text[b-74jrswsrsj] {
+    display: flex;
+    flex-direction: column;
+}
+
+.republic[b-74jrswsrsj] {
+    font-size: 14px;
+}
+
+.agency-name[b-74jrswsrsj] {
+    font-weight: bold;
+    font-size: 16px;
+    text-decoration: underline;
+}
+
+.agency-tagline[b-74jrswsrsj] {
+    font-size: 14px;
+}
+
+.right-section[b-74jrswsrsj] {
+    margin-left: 40%;
+    width: auto;
+}
+
+.time-text[b-74jrswsrsj] {
+    text-align: right;
+    font-size: 14px;
+}
+
+.bagong-logo[b-74jrswsrsj] {
+    height: 60px;
+    margin-right: 20%;
+}
+
+.time-label[b-74jrswsrsj] {
+}
+
+.header-main[b-74jrswsrsj] {
+    top: unset;
+    position: relative;
+}
+
+.custom-overlay[b-74jrswsrsj] {
+    position: fixed;
+    top: 64px; /* Height of the AppBar */
+    left: 0;
+    width: 100%;
+    height: calc(100% - 64px);
+    background-color: rgba(0, 0, 0, 0.4);
+    z-index: 1100; /* Just below MudDrawer z-index */
+}
+/* /Layout/DivisionChiefLayout.razor.rz.scp.css */
+.header-container[b-ch0ky2kmx8] {
+    /*position: sticky;*/ /* or use 'fixed' if you want it always visible */
+    top: 0;
+    z-index: 1000; /* ensure it stays on top of other elements */
+    display: flex;
+    flex-direction: column;
+    font-family: Arial, sans-serif;
+    background-color: white; /* optional: to prevent transparency overlap */
+}
+
+.main-content[b-ch0ky2kmx8] {
+    flex: 1;
+    padding: 16px;
+    overflow: auto;
+}
+
+    .main-content.shifted[b-ch0ky2kmx8] {
+        margin-left: 240px;
+    }
+
+    .main-content.expanded[b-ch0ky2kmx8] {
+        margin-left: 60px;
+    }
+
+.top-header[b-ch0ky2kmx8] {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 12px 16px;
+    background-color: white;
+}
+
+.left-section[b-ch0ky2kmx8] {
+    display: flex;
+    align-items: center;
+}
+
+.logo[b-ch0ky2kmx8] {
+    height: 50px;
+    margin-right: 16px;
+}
+
+.agency-text[b-ch0ky2kmx8] {
+    display: flex;
+    flex-direction: column;
+}
+
+.republic[b-ch0ky2kmx8] {
+    font-size: 14px;
+}
+
+.agency-name[b-ch0ky2kmx8] {
+    font-weight: bold;
+    font-size: 16px;
+    text-decoration: underline;
+}
+
+.agency-tagline[b-ch0ky2kmx8] {
+    font-size: 14px;
+}
+
+.right-section[b-ch0ky2kmx8] {
+    margin-left: 40%;
+    width: auto;
+}
+
+.time-text[b-ch0ky2kmx8] {
+    text-align: right;
+    font-size: 14px;
+}
+
+.bagong-logo[b-ch0ky2kmx8] {
+    height: 60px;
+    margin-right: 20%;
+}
+
+.time-label[b-ch0ky2kmx8] {
+}
+
+.header-main[b-ch0ky2kmx8] {
+    top: unset;
+    position: relative;
+}
+
+.custom-overlay[b-ch0ky2kmx8] {
+    position: fixed;
+    top: 64px; /* Height of the AppBar */
+    left: 0;
+    width: 100%;
+    height: calc(100% - 64px);
+    background-color: rgba(0, 0, 0, 0.4);
+    z-index: 1100; /* Just below MudDrawer z-index */
+}
+/* /Layout/LoginLayout.razor.rz.scp.css */
+.login-body[b-oidfrvjt5q] {
+    margin: 0;
+    padding: 0;
+    height: 100vh;
+    width: 100vw;
+}
+/* /Layout/MainLayout.razor.rz.scp.css */
+.header-container[b-lbs29wys19] {
+    /*position: sticky;*/ /* or use 'fixed' if you want it always visible */
+    top: 0;
+    z-index: 1000; /* ensure it stays on top of other elements */
+    display: flex;
+    flex-direction: column;
+    font-family: Arial, sans-serif;
+    background-color: white; /* optional: to prevent transparency overlap */
+}
+
+.main-content[b-lbs29wys19] {
+    flex: 1;
+    padding: 16px;
+    overflow: auto;
+}
+
+    .main-content.shifted[b-lbs29wys19] {
+        margin-left: 240px;
+    }
+
+    .main-content.expanded[b-lbs29wys19] {
+        margin-left: 60px;
+    }
+
+.top-header[b-lbs29wys19] {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 12px 16px;
+    background-color: white;
+}
+
+.left-section[b-lbs29wys19] {
+    display: flex;
+    align-items: center;
+}
+
+.logo[b-lbs29wys19] {
+    height: 50px;
+    margin-right: 16px;
+}
+
+.agency-text[b-lbs29wys19] {
+    display: flex;
+    flex-direction: column;
+}
+
+.republic[b-lbs29wys19] {
+    font-size: 14px;
+}
+
+.agency-name[b-lbs29wys19] {
+    font-weight: bold;
+    font-size: 16px;
+    text-decoration: underline;
+}
+
+.agency-tagline[b-lbs29wys19] {
+    font-size: 14px;
+}
+
+.right-section[b-lbs29wys19] {
+    margin-left: 40%;
+    width: auto;
+}
+
+.time-text[b-lbs29wys19] {
+    text-align: right;
+    font-size: 14px;
+}
+
+.bagong-logo[b-lbs29wys19] {
+    height: 60px;
+    margin-right: 20%;
+}
+
+.time-label[b-lbs29wys19] {
+}
+
+.header-main[b-lbs29wys19] {
+    top: unset;
+    position: relative;
+}
+
+.custom-overlay[b-lbs29wys19] {
+    position: fixed;
+    top: 64px; /* Height of the AppBar */
+    left: 0;
+    width: 100%;
+    height: calc(100% - 64px);
+    background-color: rgba(0, 0, 0, 0.4);
+    z-index: 1100; /* Just below MudDrawer z-index */
+}
+/* /Layout/MainNavMenuLayout.razor.rz.scp.css */
+/* Sidebar nav menu */
+/*.mud-navmenu {
+    font-size: 0.95rem;
+    padding-top: 0.5rem;
+}
+
+.mud-nav-link {
+    color: #333 !important;
+    border-radius: 6px;
+    margin: 0.2rem 0;
+    padding: 0.7rem 1rem;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+    .mud-nav-link:hover {
+        background-color: rgba(0, 51, 102, 0.1) !important;
+        color: #003366 !important;
+    }
+
+    .mud-nav-link.active {
+        background-color: #e6f0ff !important;
+        color: #003366 !important;
+        font-weight: 600;
+    }
+
+.mud-nav-group .mud-nav-link-text {
+    font-size: 0.8rem;
+    text-transform: uppercase;
+    font-weight: 600;
+    color: #555;
+}*/
+
+/* Logout */
+/*.mud-nav-link[icon="Logout"] {
+    color: #d32f2f !important;
+    font-weight: bold;
+}*/
+/* /Layout/ProcessorLayout.razor.rz.scp.css */
+.header-container[b-k2250ibyrc] {
+    /*position: sticky;*/ /* or use 'fixed' if you want it always visible */
+    top: 0;
+    z-index: 1000; /* ensure it stays on top of other elements */
+    display: flex;
+    flex-direction: column;
+    font-family: Arial, sans-serif;
+    background-color: white; /* optional: to prevent transparency overlap */
+}
+
+.main-content[b-k2250ibyrc] {
+    flex: 1;
+    padding: 16px;
+    overflow: auto;
+}
+
+    .main-content.shifted[b-k2250ibyrc] {
+        margin-left: 240px;
+    }
+
+    .main-content.expanded[b-k2250ibyrc] {
+        margin-left: 60px;
+    }
+
+.top-header[b-k2250ibyrc] {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 12px 16px;
+    background-color: white;
+}
+
+.left-section[b-k2250ibyrc] {
+    display: flex;
+    align-items: center;
+}
+
+.logo[b-k2250ibyrc] {
+    height: 50px;
+    margin-right: 16px;
+}
+
+.agency-text[b-k2250ibyrc] {
+    display: flex;
+    flex-direction: column;
+}
+
+.republic[b-k2250ibyrc] {
+    font-size: 14px;
+}
+
+.agency-name[b-k2250ibyrc] {
+    font-weight: bold;
+    font-size: 16px;
+    text-decoration: underline;
+}
+
+.agency-tagline[b-k2250ibyrc] {
+    font-size: 14px;
+}
+
+.right-section[b-k2250ibyrc] {
+    margin-left: 40%;
+    width: auto;
+}
+
+.time-text[b-k2250ibyrc] {
+    text-align: right;
+    font-size: 14px;
+}
+
+.bagong-logo[b-k2250ibyrc] {
+    height: 60px;
+    margin-right: 20%;
+}
+
+.time-label[b-k2250ibyrc] {
+}
+
+.header-main[b-k2250ibyrc] {
+    top: unset;
+    position: relative;
+}
+
+.custom-overlay[b-k2250ibyrc] {
+    position: fixed;
+    top: 64px; /* Height of the AppBar */
+    left: 0;
+    width: 100%;
+    height: calc(100% - 64px);
+    background-color: rgba(0, 0, 0, 0.4);
+    z-index: 1100; /* Just below MudDrawer z-index */
+}
+/* /Layout/SectionChiefLayout.razor.rz.scp.css */
+.header-container[b-9nqh5o459t] {
+    /*position: sticky;*/ /* or use 'fixed' if you want it always visible */
+    top: 0;
+    z-index: 1000; /* ensure it stays on top of other elements */
+    display: flex;
+    flex-direction: column;
+    font-family: Arial, sans-serif;
+    background-color: white; /* optional: to prevent transparency overlap */
+}
+
+.main-content[b-9nqh5o459t] {
+    flex: 1;
+    padding: 16px;
+    overflow: auto;
+}
+
+    .main-content.shifted[b-9nqh5o459t] {
+        margin-left: 240px;
+    }
+
+    .main-content.expanded[b-9nqh5o459t] {
+        margin-left: 60px;
+    }
+
+.top-header[b-9nqh5o459t] {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 12px 16px;
+    background-color: white;
+}
+
+.left-section[b-9nqh5o459t] {
+    display: flex;
+    align-items: center;
+}
+
+.logo[b-9nqh5o459t] {
+    height: 50px;
+    margin-right: 16px;
+}
+
+.agency-text[b-9nqh5o459t] {
+    display: flex;
+    flex-direction: column;
+}
+
+.republic[b-9nqh5o459t] {
+    font-size: 14px;
+}
+
+.agency-name[b-9nqh5o459t] {
+    font-weight: bold;
+    font-size: 16px;
+    text-decoration: underline;
+}
+
+.agency-tagline[b-9nqh5o459t] {
+    font-size: 14px;
+}
+
+.right-section[b-9nqh5o459t] {
+    margin-left: 40%;
+    width: auto;
+}
+
+.time-text[b-9nqh5o459t] {
+    text-align: right;
+    font-size: 14px;
+}
+
+.bagong-logo[b-9nqh5o459t] {
+    height: 60px;
+    margin-right: 20%;
+}
+
+.time-label[b-9nqh5o459t] {
+}
+
+.header-main[b-9nqh5o459t] {
+    top: unset;
+    position: relative;
+}
+
+.custom-overlay[b-9nqh5o459t] {
+    position: fixed;
+    top: 64px; /* Height of the AppBar */
+    left: 0;
+    width: 100%;
+    height: calc(100% - 64px);
+    background-color: rgba(0, 0, 0, 0.4);
+    z-index: 1100; /* Just below MudDrawer z-index */
+}
+/* /Layout/SharedLayout.razor.rz.scp.css */
+.header-container[b-hctyrlj1e3] {
+    /*position: sticky;*/ /* or use 'fixed' if you want it always visible */
+    top: 0;
+    z-index: 1000; /* ensure it stays on top of other elements */
+    display: flex;
+    flex-direction: column;
+    font-family: Arial, sans-serif;
+    background-color: white; /* optional: to prevent transparency overlap */
+}
+
+.main-content[b-hctyrlj1e3] {
+    flex: 1;
+    padding: 16px;
+    overflow: auto;
+}
+
+    .main-content.shifted[b-hctyrlj1e3] {
+        margin-left: 240px;
+    }
+
+    .main-content.expanded[b-hctyrlj1e3] {
+        margin-left: 60px;
+    }
+
+.top-header[b-hctyrlj1e3] {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 12px 16px;
+    background-color: white;
+}
+
+.left-section[b-hctyrlj1e3] {
+    display: flex;
+    align-items: center;
+}
+
+.logo[b-hctyrlj1e3] {
+    height: 50px;
+    margin-right: 16px;
+}
+
+.agency-text[b-hctyrlj1e3] {
+    display: flex;
+    flex-direction: column;
+}
+
+.republic[b-hctyrlj1e3] {
+    font-size: 14px;
+}
+
+.agency-name[b-hctyrlj1e3] {
+    font-weight: bold;
+    font-size: 16px;
+    text-decoration: underline;
+}
+
+.agency-tagline[b-hctyrlj1e3] {
+    font-size: 14px;
+}
+
+.right-section[b-hctyrlj1e3] {
+    margin-left: 40%;
+    width: auto;
+}
+
+.time-text[b-hctyrlj1e3] {
+    text-align: right;
+    font-size: 14px;
+}
+
+.bagong-logo[b-hctyrlj1e3] {
+    height: 60px;
+    margin-right: 20%;
+}
+
+.time-label[b-hctyrlj1e3] {
+}
+
+.header-main[b-hctyrlj1e3] {
+    top: unset;
+    position: relative;
+}
+
+.custom-overlay[b-hctyrlj1e3] {
+    position: fixed;
+    top: 64px; /* Height of the AppBar */
+    left: 0;
+    width: 100%;
+    height: calc(100% - 64px);
+    background-color: rgba(0, 0, 0, 0.4);
+    z-index: 1100; /* Just below MudDrawer z-index */
+}
+/* /Pages/Forms/BursForm.razor.rz.scp.css */
+.burs-form-container[b-yj3nb95zoz] {
+    max-width: 900px;
+    margin: auto;
+    padding: 20px 30px;
+    background-color: white;
+    border-radius: 8px;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.4);
+}
+
+.mud-grid[b-yj3nb95zoz] {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 16px;
+}
+
+.mud-item[b-yj3nb95zoz] {
+    width: 100%;
+}
+
+@media (min-width: 600px) {
+    .mud-item-half[b-yj3nb95zoz] {
+        width: calc(50% - 8px);
+    }
+}
+/* /Pages/Forms/OrsForm.razor.rz.scp.css */
+.ors-form-container[b-ez8tz83ktx] {
+    max-width: 900px; /* Keeps it centered and not too wide */
+    margin: auto;
+    padding: 20px 30px;
+    background-color: white;
+    border-radius: 8px;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.4);
+}
+
+/* Make the grid inputs fit naturally without too much height */
+.mud-grid[b-ez8tz83ktx] {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 16px;
+}
+
+/* Ensure each input stretches to fill its column */
+.mud-item[b-ez8tz83ktx] {
+    width: 100%;
+}
+
+/* Slight adjustment for side-by-side fields on larger screens */
+@media (min-width: 600px) {
+    .mud-item-half[b-ez8tz83ktx] {
+        width: calc(50% - 8px);
+    }
+}

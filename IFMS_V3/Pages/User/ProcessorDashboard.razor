@@ -1,0 +1,257 @@
+﻿@page "/processor-dashboard"
+@layout ProcessorLayout
+@inject AuthenticationStateProvider AuthProvider
+@using IFMS_V3.Services.Pdf
+@using Microsoft.AspNetCore.Components.Authorization
+@inject NavigationManager Navigation
+@using IFMS_V3.Models.Ors.ProcessorModel
+@inject ISnackbar Snackbar
+@inject IFMS_V3.Services.Ors.OrsService OrsService
+@inject IDialogService DialogService
+@using IFMS_V3.Models.Ors
+@inject IJSRuntime JS
+@inject HttpClient Http
+@inject IDialogService _dialogService
+@using IFMS_V3.Dialogs.Ors
+
+
+<MudContainer Class="mt-2 px-8" Style="height: 250px; display: flex;" MaxWidth="MaxWidth.False">
+    <div style="display: flex; width: 100%; height: 100%; gap: 20px; align-items: flex-end;">
+
+        <!-- Announcements -->
+        <MudPaper Elevation="3" Height="100%" Style="flex: 2;" Square="true" Class="white d-flex flex-column align-center rounded">
+            <a href="/Status"
+               class="mud-typography mud-typography-body1"
+               style="display: block; width: 100%; padding: 1rem 2rem; text-decoration: none; color: black; text-align: center;"
+               onmouseover="this.style.backgroundColor='#f6f6f6'; this.style.color='darkblue';"
+               onmouseout="this.style.backgroundColor='transparent'; this.style.color='black';">
+                Announcements
+            </a>
+        </MudPaper>
+
+        <!-- Status Summary -->
+        <MudPaper Elevation="3" Height="100%" Style="flex: 1;" Square="true" Class="white d-flex flex-column align-center rounded">
+            <a href="/Status"
+               class="mud-typography mud-typography-body1"
+               style="display: block; width: 100%; padding: 1rem 2rem; text-decoration: none; color: black; text-align: center;"
+               onmouseover="this.style.backgroundColor='#f6f6f6'; this.style.color='darkblue';"
+               onmouseout="this.style.backgroundColor='transparent'; this.style.color='black';">
+                Application Status Summary
+            </a>
+
+            <MudChart ChartType="ChartType.Donut"
+                      Width="55%" Height="55%" InputData="@data" InputLabels="@labels">
+                <CustomGraphics>
+                    <text x="50%" y="45%" dominant-baseline="middle" text-anchor="middle" fill="black" font-size="30">Total</text>
+                    <text x="50%" y="65%" dominant-baseline="middle" text-anchor="middle" fill="black" font-size="48">@data.Sum()</text>
+                </CustomGraphics>
+            </MudChart>
+        </MudPaper>
+    </div>
+</MudContainer>
+
+<MudContainer Class="px-0" MaxWidth="MaxWidth.False">
+    <MudContainer Class="mt-4 px-8" MaxWidth="MaxWidth.False">
+        <MudPaper>
+            <MudGrid Class="mb-4">
+                <MudItem xs="12" sm="8">
+                    <MudTextField @bind-Value="_searchText"
+                                  Placeholder="Search"
+                                  Variant="Variant.Outlined"
+                                  Adornment="Adornment.Start"
+                                  AdornmentIcon="@Icons.Material.Filled.Search"
+                                  Immediate="true"
+                                  Class="w-100"
+                                  Style="border-radius: 8px;" />
+                </MudItem>
+
+                <MudItem xs="6" sm="2" Class="d-flex justify-end">
+                    <MudSelect T="string"
+                               Value="@_selectedFilter"
+                               ValueChanged="OnOptionChanged"
+                               Class="w-100"
+                               Color="Color.Primary"
+                               Variant="Variant.Outlined"
+                               Dense="true">
+                        <MudSelectItem Value="@("Default")">Default</MudSelectItem>
+                        <MudSelectItem Value="@("Ors")">ORS</MudSelectItem>
+                        <MudSelectItem Value="@("Burs")">BURS</MudSelectItem>
+                        <MudSelectItem Value="@("Norsa")">NORSA</MudSelectItem>
+                    </MudSelect>
+                </MudItem>
+
+                <MudItem xs="6" sm="2" Class="d-flex justify-end">
+                    <MudButton Variant="Variant.Outlined"
+                               Color="Color.Primary"
+                               OnClick="RefreshTable"
+                               Class="w-100">
+                        Refresh
+                    </MudButton>
+                </MudItem>
+            </MudGrid>
+
+            <MudTable Items="FilteredRecords" Hover="true" Striped="true" Bordered="true">
+                <HeaderContent>
+                    <MudTh Style="text-align:center; padding: 1rem 8px; background-color: midnightblue; color: white;">Payee</MudTh>
+                    <MudTh Style="text-align:center; padding: 1rem 8px; background-color: midnightblue; color: white;">Transaction ID</MudTh>
+                    <MudTh Style="text-align:center; padding: 1rem 8px; background-color: midnightblue; color: white;">Amount</MudTh>
+                    <MudTh Style="text-align:center; padding: 1rem 8px; background-color: midnightblue; color: white;">Type</MudTh>
+                    <MudTh Style="text-align:center; padding: 1rem 8px; background-color: midnightblue; color: white;">Status</MudTh>
+                    <MudTh Style="text-align:center; padding: 1rem 8px; background-color: midnightblue; color: white;">Action</MudTh>
+
+                </HeaderContent>
+                <RowTemplate Context="record">
+                    <MudTd DataLabel="Payee">@record.Payee</MudTd>
+                    <MudTd DataLabel="ID">@record.Id</MudTd>
+                    <MudTd DataLabel="Amount">@record.Amount</MudTd>
+                    <MudTd DataLabel="Type">@record.Type</MudTd>
+                    <MudTd DataLabel="Status">@record.Status</MudTd>
+                    <MudTd>
+                        <MudButton Variant="Variant.Outlined" Color="Color.Primary"
+                                   OnClick="@(() => OpenPdf(record.Id))">
+                            Review
+                        </MudButton>
+
+                    </MudTd>
+
+                </RowTemplate>
+            </MudTable>
+        </MudPaper>
+    </MudContainer>
+</MudContainer>
+
+@code {
+    [Parameter] public int orsListId { get; set; }
+
+    private int _activeTabIndex = 0; 
+    private string _selectedFilter = "All";
+    private string _searchText = "";
+
+    public double[] data = { 5, 2 };
+    public string[] labels = { "Complete", "Incomplete" };
+
+    private List<ProcessorModel.ProcessorDashboardModel> orsList = new();
+    private List<ProcessorModel.ProcessorDashboardModel> Bursrecords = new();
+
+    private IEnumerable<ProcessorModel.ProcessorDashboardModel> FilteredRecords =>
+        orsList.Where(r =>
+            (_selectedFilter == "All" ||
+             (r.Type?.Equals(_selectedFilter, StringComparison.OrdinalIgnoreCase) ?? false))
+            &&
+            (string.IsNullOrWhiteSpace(_searchText) ||
+             r.Payee.Contains(_searchText, StringComparison.OrdinalIgnoreCase))
+        );
+
+    private void SetFilterFromTab(int index)
+    {
+        if (index == 0) SetFilter("All");
+        else if (index == 1) SetFilter("Ors");
+        else if (index == 2) SetFilter("Burs");
+        else if (index == 3) SetFilter("Norsa");
+    }
+
+    private void SetFilter(string filter)
+    {
+        _selectedFilter = filter;
+        StateHasChanged();
+    }
+
+    private void RefreshTable()
+    {
+        _searchText = string.Empty;
+        _selectedFilter = "All";
+        StateHasChanged();
+    }
+
+    protected override async Task OnInitializedAsync()
+    {
+        var authState = await AuthProvider.GetAuthenticationStateAsync();
+        var user = authState.User;
+
+        if (!user.Identity.IsAuthenticated)
+        {
+            Navigation.NavigateTo("/", true);
+            return;
+        }
+
+        try
+        {
+            orsList = await OrsService.GetAllProcessorDataAsync();
+        }
+        catch (Exception ex)
+        {
+            Snackbar.Add($"Failed to load dashboard data. Error: {ex.Message}", Severity.Error);
+            orsList = new List<ProcessorModel.ProcessorDashboardModel>();
+        }
+    }
+
+
+
+    private async Task OnOptionChanged(string value)
+    {
+        _selectedFilter = value;
+        await InvokeAsync(StateHasChanged); // re-render UI
+    }
+
+    // private void NavigateToReview(int recordId)
+    // {
+    //     Navigation.NavigateTo($"/ORS-Review/{recordId}");
+    // }
+
+    private async Task OpenPdf(int recordId)
+    {
+        // Find the record in orsList
+        var record = orsList.FirstOrDefault(r => r.Id == recordId);
+        if (record == null)
+        {
+            Snackbar.Add("Record not found.", Severity.Error);
+            return;
+        }
+
+        // Map ProcessorDashboardModel -> OrsModel for PDF generator
+        var orsModel = new OrsModel
+        {
+            Ors_Id = record.Id,
+            OrsNumber = record.OrsNumber,
+            OrsDate = record.OrsDate,
+            fundCodeName = record.fundCodeName,
+            fundClusterName = record.fundClusterName,
+            Payee = record.Payee,
+            Office = record.Office,
+            Address = record.Address,
+            Particulars = record.Particulars,
+            // ResponsibilityCenterId = record.ResponsibilityCenterId,
+            responsibilityCenterName =record.responsibilityCenterName,
+            mfoPapName = record.mfoPapName,
+            uacsCodeName = record.uacsCodeName,
+            Amount = record.Amount,
+            Total = record.Total,
+            SignatoryA = record.SignatoryA,
+            PositionA = record.PositionA,
+            SignatoryB = record.SignatoryB,
+            PositionB = record.PositionB
+        };
+
+        // Generate PDF
+        var generator = new ORSPdfMock(Http);
+        var pdfBytes = await generator.GenerateORSAsync(orsModel);
+
+        // Open in MudDialog
+        var parameters = new DialogParameters
+       {
+           ["PdfBytes"] = pdfBytes,
+           ["orsListId"] = record.Id   // 👈 now properly separated by a comma
+       };
+        var options = new DialogOptions
+        {
+            MaxWidth = MaxWidth.ExtraLarge,
+            FullWidth = true
+        };
+
+        _dialogService.Show<PdfDialog>("ORS PDF Preview", parameters, options);
+
+    }
+
+
+
+}

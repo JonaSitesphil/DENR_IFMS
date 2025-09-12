@@ -1,0 +1,285 @@
+﻿@page "/burs-form"
+@using MudBlazor
+@using IFMS_V3.Models.Burs
+@inject ISnackbar Snackbar
+@inject NavigationManager NavigationManager
+@inject IFMS_V3.Services.Burs.BursService BursService
+@inject IDialogService DialogService
+@using IFMS_V3.Dialogs.Burs
+@using IFMS_V3.Dto.Burs
+<div class="burs-form-container">
+    <MudText Typo="Typo.h5" Align="Align.Center" Class="mb-4">New BURS</MudText>
+
+    <MudForm @ref="mudForm" Model="bursForm">
+        <MudGrid Class="mt-2" GutterSize="16px">
+
+            <!-- Payee -->
+            <MudItem xs="12" sm="6">
+                <MudTextField @bind-Value="bursForm.Payee" Label="Payee" Required="true" />
+            </MudItem>
+
+            <!-- BURS Number -->
+            <MudItem xs="12" sm="6">
+                <MudTextField @bind-Value="bursForm.BursNumber" Label="BURS Number" Required="true" />
+            </MudItem>
+
+            <!-- BURS Date -->
+            <MudItem xs="12" sm="6">
+                <MudDatePicker @bind-Date="bursForm.BursDate" Label="BURS Date" Required="true" />
+            </MudItem>
+
+            <!-- Office -->
+            <MudItem xs="12" sm="6">
+                <MudTextField @bind-Value="bursForm.Office" Label="Office" Required="true" />
+            </MudItem>
+
+            <!-- Address -->
+            <MudItem xs="12">
+                <MudTextField @bind-Value="bursForm.Address" Label="Address" Required="true" />
+            </MudItem>
+
+            <!-- Fund -->
+            <MudItem xs="12" sm="6">
+                <MudTextField @bind-Value="bursForm.Fund" Label="Fund" Required="true" />
+            </MudItem>
+
+            <!-- Responsibility Center -->
+            <MudItem xs="12" sm="6">
+                <MudSelect T="int" Label="Responsibility Center" @bind-Value="bursForm.ResponsibilityCenterId"
+                           FullWidth="true" Required="true" Virtualize="true" OnScrollToBottom="LoadMoreResponsibilityCenters">
+                    <MudSelectItem T="int" Value="0" Disabled>Select</MudSelectItem>
+                    @foreach (var rc in responsibilityCenters)
+                    {
+                        <MudSelectItem T="int" Value="rc.id">@($"{rc.rcCode} - {rc.rcName}")</MudSelectItem>
+                    }
+                    ...
+                </MudSelect>
+            </MudItem>
+
+           
+
+            <!-- Particulars -->
+            <MudItem xs="12">
+                <MudTextField @bind-Value="bursForm.Particulars" Label="Particulars" Lines="4" TextArea="true" Required="true" />
+            </MudItem>
+
+
+
+            <!-- MFO/PAP -->
+            <MudItem xs="12" sm="6">
+                <MudSelect T="int" Label="MFO/PAPs" @bind-Value="bursForm.MfoPapId"
+                           FullWidth="true" Required="true" Virtualize="true" OnScrollToBottom="LoadMoreMFOPAPs">
+                    <MudSelectItem T="int" Value="0" Disabled>Select</MudSelectItem>
+                    @foreach (var mfo in mfopaps)
+                    {
+                        <MudSelectItem T="int" Value="mfo.id">@($"{mfo.mfoPapCode} - {mfo.mfoPapDescription}")</MudSelectItem>
+                    }
+                    ...
+                </MudSelect>
+            </MudItem>
+
+         
+
+            <!-- UACS Code -->
+            <MudItem xs="12" sm="6">
+                <MudSelect T="int" Label="UACS Code" @bind-Value="bursForm.UacsCodeId"
+                           FullWidth="true" Required="true" Virtualize="true" OnScrollToBottom="LoadMoreUACS">
+                    <MudSelectItem T="int" Value="0" Disabled>Select</MudSelectItem>
+                    @foreach (var uac in uacs)
+                    {
+                        <MudSelectItem T="int" Value="uac.id">
+                            @(string.IsNullOrWhiteSpace(uac.subObjectCode) ? uac.uacs.ToString() : $"{uac.subObjectCode} - {uac.uacs}")
+                        </MudSelectItem>
+                    }
+                    ...
+                </MudSelect>
+            </MudItem>
+
+            <!-- Left Date -->
+            @* <MudItem xs="12" sm="6">
+                <MudDatePicker @bind-Date="bursForm.LeftDate" Label="Left Date" Required="true" />
+            </MudItem> *@
+
+            <!-- Total -->
+            <MudItem xs="12" sm="6">
+                <MudNumericField T="double" Value="bursForm.Amount" ValueChanged="OnAmountChanged" Label="Amount" Min="0.01" Required="true" />
+            </MudItem>
+
+            <!-- Total -->
+            <MudItem xs="12" sm="6">
+                <MudNumericField T="double" @bind-Value="bursForm.Total" Label="Total" Min="0.01" Required="true" ReadOnly="true" />
+            </MudItem>
+
+
+            <MudItem xs="12" sm="6">
+                <MudText Typo="Typo.subtitle2" Class="mt-2">Signatory A</MudText>
+                <MudTextField T="string" @bind-Value="bursForm.SignatoryA" Label="Name" Required="true" />
+                <MudTextField T="string" @bind-Value="bursForm.PositionA" Label="Position" Required="true" />
+            </MudItem>
+
+            <!-- Signatory B -->
+            <MudItem xs="12" sm="6">
+                <MudText Typo="Typo.subtitle2" Class="mt-2">Signatory B</MudText>
+                <MudTextField T="string" @bind-Value="bursForm.SignatoryB" Label="Name" Required="true" />
+                <MudTextField T="string" @bind-Value="bursForm.PositionB" Label="Position" Required="true" />
+            </MudItem>
+            
+          
+
+            <!-- Buttons -->
+            <MudItem xs="12" sm="6" Class="d-flex justify-end align-end mt-4">
+                <MudButton Variant="Variant.Outlined" Color="Color.Secondary" OnClick="CancelForm" Class="me-2">
+                    Cancel
+                </MudButton>
+
+                <MudButton Variant="Variant.Filled" Color="Color.Primary" OnClick="OpenConfirmationDialog">
+                    Next
+                </MudButton>
+            </MudItem>
+        </MudGrid>
+    </MudForm>
+</div>
+
+
+@code {
+    private MudForm mudForm;
+    private BursModel bursForm = new();
+
+    private const int PageSize = 10;
+
+    private List<ResponsibilityCenter> responsibilityCenters = new();
+    private int rcPage = 1;
+    private bool rcIsLoading = false;
+    private bool rcHasMore = true;
+
+    private List<MFOPAP> mfopaps = new();
+    private int mfoPage = 1;
+    private bool mfoIsLoading = false;
+    private bool mfoHasMore = true;
+
+    private List<UACS> uacs = new();
+    private int uacsPage = 1;
+    private bool uacsIsLoading = false;
+    private bool uacsHasMore = true;
+
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadMoreResponsibilityCenters();
+        await LoadMoreMFOPAPs();
+        await LoadMoreUACS();
+
+        bursForm.ResponsibilityCenterId = 0;
+        bursForm.MfoPapId = 0;
+        bursForm.UacsCodeId = 0;
+    }
+
+    private async Task LoadMoreResponsibilityCenters()
+    {
+        if (rcIsLoading || !rcHasMore) return;
+        rcIsLoading = true;
+        var result = await BursService.GetResponsibilityCenters(rcPage, PageSize);
+        if (result?.Any() == true)
+        {
+            responsibilityCenters.AddRange(result);
+            rcPage++;
+        }
+        else
+        {
+            rcHasMore = false;
+        }
+        rcIsLoading = false;
+    }
+
+    private async Task LoadMoreMFOPAPs()
+    {
+        if (mfoIsLoading || !mfoHasMore) return;
+        mfoIsLoading = true;
+        var result = await BursService.GetMFOPAPs(mfoPage, PageSize);
+        if (result?.Any() == true)
+        {
+            mfopaps.AddRange(result);
+            mfoPage++;
+        }
+        else
+        {
+            mfoHasMore = false;
+        }
+        mfoIsLoading = false;
+    }
+
+    private async Task LoadMoreUACS()
+    {
+        if (uacsIsLoading || !uacsHasMore) return;
+        uacsIsLoading = true;
+        var result = await BursService.GetUACS(uacsPage, PageSize);
+        if (result?.Any() == true)
+        {
+            uacs.AddRange(result);
+            uacsPage++;
+        }
+        else
+        {
+            uacsHasMore = false;
+        }
+        uacsIsLoading = false;
+    }
+
+    private async Task OpenConfirmationDialog()
+    {
+        await mudForm.Validate();
+        if (!mudForm.IsValid)
+        {
+            Snackbar.Add("Please fix the form errors.", Severity.Warning);
+            return;
+        }
+
+        var parameters = new DialogParameters { ["BursForm"] = bursForm };
+        var options = new DialogOptions { MaxWidth = MaxWidth.Large, FullWidth = true, CloseButton = true };
+
+        var dialog = DialogService.Show<ConfirmationBursDialog>("Confirm BURS Submission", parameters, options);
+        var result = await dialog.Result;
+
+        if (!result.Canceled)
+        {
+            bursForm = (BursModel)result.Data;
+            Snackbar.Add("BURS created successfully!", Severity.Success);
+            NavigationManager.NavigateTo("/admin-dashboard", forceLoad: true);
+        }
+    }
+
+    private void CancelForm()
+    {
+        NavigationManager.NavigateTo("/admin-dashboard");
+    }
+
+    private void OnAmountChanged(double value)
+    {
+        bursForm.Amount = value;
+        bursForm.Total = value;
+    }
+
+            public BursModel MapToModel(AddBursDto dto)
+    {
+        return new BursModel
+        {
+            Payee = dto.Payee,
+            BursNumber = dto.BursNumber,
+            Office = dto.Office,
+            BursDate = dto.BursDate ?? DateTime.Now, // fallback
+            Address = dto.Address,
+            Particulars = dto.Particulars,
+            ResponsibilityCenterId = dto.ResponsibilityCenterId,
+            MfoPapId = dto.MfoPapId,
+            UacsCodeId = dto.UacsCodeId,
+            Amount = dto.Amount,
+            Fund = dto.Fund,
+            SignatoryA = dto.SignatoryA,
+            PositionA = dto.PositionA,
+            SignatoryB = dto.SignatoryB,
+            PositionB = dto.PositionB,
+            Total = dto.Amount // you can auto-calc if needed
+        };
+    }
+
+        
+}

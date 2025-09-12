@@ -1,0 +1,161 @@
+﻿@inherits LayoutComponentBase
+@implements IDisposable
+@using IFMS_V3.Services.Auth
+@using Microsoft.AspNetCore.Components.Authorization
+@using MudBlazor
+@inject HttpClient HttpClient
+@inject NavigationManager NavigationManager
+@inject AuthenticationStateProvider AuthenticationStateProvider
+@inject IDialogService DialogService
+@using IFMS_V3.Dialogs.Template
+
+<MudThemeProvider />
+<MudDialogProvider />
+<MudSnackbarProvider />
+<MudPopoverProvider />
+
+<div class="header-container">
+    <div class="top-header">
+        <div class="left-section">
+            <img src="sample-data/DENR.png" class="logo" />
+            <div class="agency-text">
+                <div class="republic">Republic of the Philippines</div>
+                <div class="agency-name">DEPARTMENT OF ENVIRONMENTAL AND NATURAL RESOURCES</div>
+                <div class="agency-tagline">Kagawaran ng Kapaligiran at Likas na Yaman</div>
+            </div>
+        </div>
+
+        <div class="right-section">
+            <div class="time-label">Philippine Standard Time:</div>
+            <div class="date-value">@currentDate</div>
+            <div class="time-value">@currentTime</div>
+        </div>
+
+        <div class="img">
+            <img src="sample-data/BagongPH.png" alt="Bagong Pilipinas Logo" class="bagong-logo" />
+        </div>
+    </div>
+</div>
+
+<MudLayout>
+    <MudAppBar Style="top: unset; position: relative;">
+        <MudIconButton Icon="@Icons.Material.Filled.Menu"
+                       Color="Color.Inherit"
+                       Edge="Edge.Start"
+                       OnClick="@ToggleDrawer" />
+
+        <MudText Typo="Typo.h6" Class="dashboard-title" Color="Color.Inherit">
+            @GetPageTitle()
+        </MudText>
+
+        <MudSpacer />
+
+        <MudButton OnClick="OpenDialogAsync"
+                   Variant="Variant.Filled"
+                   Color="Color.Primary"
+                   Style="min-width: unset; padding: 4px; width: 30px; height: 30px; border-radius: 50%;">
+            <MudIcon Icon="@Icons.Material.Filled.Notifications" />
+        </MudButton>
+    </MudAppBar>
+
+    <MudDrawer @bind-Open="_open"
+               Variant="DrawerVariant.Temporary"
+               Elevation="1"
+               Anchor="Anchor.Left"
+               Overlay="true"
+               Class="drawer-overlay">
+        <MudDrawerHeader>
+            <MudText Typo="Typo.h6">My App</MudText>
+        </MudDrawerHeader>
+        <MudNavMenu>
+            <MudNavLink Href="/officer-dashboard" Icon="@Icons.Material.Filled.Home">Dashboard</MudNavLink>
+            <MudNavLink Href="/officer-budgetmanagement" Icon="@Icons.Material.Filled.AccountBalance">Budget Management</MudNavLink>
+
+            <MudNavLink Icon="@Icons.Material.Filled.People" OnClick="HandleLogout">Logout</MudNavLink>
+        </MudNavMenu>
+    </MudDrawer>
+
+    <MudMainContent Class="main-content">
+        @Body
+    </MudMainContent>
+</MudLayout>
+
+@code {
+    private string currentTime;
+    private string currentDate;
+    private System.Timers.Timer timer;
+    private bool _open = false;
+
+    private void ToggleDrawer() => _open = !_open;
+
+    protected override void OnInitialized()
+    {
+        UpdateDateTime();
+        timer = new System.Timers.Timer(1000);
+        timer.Elapsed += (sender, e) =>
+        {
+            UpdateDateTime();
+            InvokeAsync(StateHasChanged);
+        };
+        timer.Start();
+    }
+
+    private void UpdateDateTime()
+    {
+        var now = DateTime.Now;
+        currentTime = now.ToString("hh:mm:ss tt");
+        currentDate = now.ToString("dddd, MMMM dd, yyyy");
+    }
+
+    private string GetPageTitle()
+    {
+        var uri = NavigationManager.Uri.ToLower();
+
+        if (uri.Contains("/processor-dashboard"))
+            return "Dashboard";
+        else if (uri.Contains("/processor-budgetmanagement"))
+            return "Budget Management";
+        else if (uri.Contains("/login"))
+            return "Login";
+        else
+            return "My App";
+    }
+
+    private async Task OpenDialogAsync()
+    {
+        await DialogService.ShowAsync<Notification>("Notifications");
+    }
+
+    private async Task HandleLogout()
+    {
+        try
+        {
+            var requestMessage = new HttpRequestMessage(HttpMethod.Post, "api/auth/logout");
+            requestMessage.SetBrowserRequestCredentials(BrowserRequestCredentials.Include);
+            var response = await HttpClient.SendAsync(requestMessage);
+
+            response.EnsureSuccessStatusCode();
+
+            var authStateProvider = (CookieAuthenticationStateProvider)AuthenticationStateProvider;
+            authStateProvider.NotifyUserLoggedOut();
+
+            NavigationManager.NavigateTo("/", forceLoad: true);
+        }
+        catch (HttpRequestException ex)
+        {
+            Console.WriteLine($"Error during logout: {ex.Message}");
+            var authStateProvider = (CookieAuthenticationStateProvider)AuthenticationStateProvider;
+            authStateProvider.NotifyUserLoggedOut();
+            NavigationManager.NavigateTo("/", forceLoad: true);
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"An unexpected error occurred during logout: {ex.Message}");
+        }
+    }
+
+    public void Dispose()
+    {
+        timer?.Dispose();
+    }
+}

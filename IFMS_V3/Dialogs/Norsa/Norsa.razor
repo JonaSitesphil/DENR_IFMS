@@ -1,0 +1,80 @@
+﻿@* @using MudBlazor
+@inject ISnackbar Snackbar
+
+<MudPaper Class="p-6 mx-auto mt-6" Style="max-width: 800px;">
+
+    <MudForm @ref="mudForm" Model="form">
+        <MudGrid GutterSize="16px">
+
+            <MudItem xs="12" sm="4">
+                <MudTextField @bind-Value="form.NO" Label="NO." Variant="Variant.Outlined" />
+            </MudItem>
+            <MudItem xs="12" sm="4">
+                <MudDatePicker @bind-Date="form.Date" Label="Date" Variant="Variant.Outlined" />
+            </MudItem>
+            <MudItem xs="12" sm="4">
+                <MudTextField @bind-Value="form.Fund" Label="Fund" Variant="Variant.Outlined" />
+            </MudItem>
+
+            <MudItem xs="12">
+                <MudTextField @bind-Value="form.ResponsibilityCenter" Label="Responsibility Center" Variant="Variant.Outlined" />
+            </MudItem>
+            <MudItem xs="12">
+                <MudTextField @bind-Value="form.Particulars" Label="Particulars no." Variant="Variant.Outlined" />
+            </MudItem>
+            <MudItem xs="12">
+                <MudTextField @bind-Value="form.MFOPAP" Label="MFO/PAP" Variant="Variant.Outlined" />
+            </MudItem>
+            <MudItem xs="12">
+                <MudTextField @bind-Value="form.AccountCode" Label="Account Code" Variant="Variant.Outlined" />
+            </MudItem>
+
+            <MudItem xs="12" sm="6">
+                <MudTextField @bind-Value="form.JVENumber" Label="JVE number" Variant="Variant.Outlined" />
+            </MudItem>
+            <MudItem xs="12" sm="6">
+                <MudDatePicker @bind-Date="form.JVEDate" Label="Date" Variant="Variant.Outlined" />
+            </MudItem>
+
+            <MudItem xs="12">
+                <MudTextField @bind-Value="form.Amount" Label="Amount" Variant="Variant.Outlined" />
+            </MudItem>
+
+            <MudItem xs="12" Class="d-flex justify-end mt-4">
+                <MudButton Variant="Variant.Outlined" Color="Color.Primary" OnClick="SubmitForm">Next</MudButton>
+            </MudItem>
+        </MudGrid>
+    </MudForm>
+</MudPaper>
+
+@code {
+    private MudForm mudForm;
+    private NorsaForm form = new();
+
+    private async Task SubmitForm()
+    {
+        await mudForm.Validate();
+        if (mudForm.IsValid)
+        {
+            Snackbar.Add("Form submitted successfully!", Severity.Success);
+        }
+        else
+        {
+            Snackbar.Add("Please correct the errors.", Severity.Error);
+        }
+    }
+
+    public class NorsaForm
+    {
+        public string NO { get; set; }
+        public DateTime? Date { get; set; }
+        public string Fund { get; set; }
+        public string ResponsibilityCenter { get; set; }
+        public string Particulars { get; set; }
+        public string MFOPAP { get; set; }
+        public string AccountCode { get; set; }
+        public string JVENumber { get; set; }
+        public DateTime? JVEDate { get; set; }
+        public string Amount { get; set; }
+    }
+} *@

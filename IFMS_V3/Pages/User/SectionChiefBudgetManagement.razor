@@ -1,0 +1,173 @@
+﻿@* @page "/section-chief-budgetmanagement"
+@layout SectionChiefLayout
+@using IFMS_V3.Dialogs.Template
+@inject IDialogService DialogService
+
+<MudContainer Class="mt-4 px-8" MaxWidth="MaxWidth.False">
+    <MudContainer Class="px-0" MaxWidth="MaxWidth.False">
+        <MudPaper>
+            <MudGrid Class="mb-4">
+                <MudItem xs="12" sm="8">
+                    <MudTextField @bind-Value="_searchText"
+                                  Placeholder="Search"
+                                  Variant="Variant.Outlined"
+                                  Adornment="Adornment.Start"
+                                  AdornmentIcon="@Icons.Material.Filled.Search"
+                                  Immediate="true"
+                                  Class="w-100"
+                                  Style="border-radius: 8px;" />
+                </MudItem>
+                <MudItem xs="6" sm="2" Class="d-flex justify-end">
+                    <MudSelect T="string"
+                               Value="@_selectedFilter"
+                               ValueChanged="OnOptionChanged"
+                               Class="w-100"
+                               Color="Color.Primary"
+                               Variant="Variant.Outlined"
+                               Dense="true">
+                        <MudSelectItem Value="@("Default")">Default</MudSelectItem>
+                        <MudSelectItem Value="@("Ors")">ORS</MudSelectItem>
+                        <MudSelectItem Value="@("Burs")">BURS</MudSelectItem>
+                        <MudSelectItem Value="@("Norsa")">NORSA</MudSelectItem>
+                    </MudSelect>
+                </MudItem>
+                <MudItem xs="6" sm="2" Class="d-flex justify-end">
+                    <MudButton Variant="Variant.Outlined"
+                               Color="Color.Primary"
+                               OnClick="RefreshTable"
+                               Class="w-100">
+                        Refresh
+                    </MudButton>
+                </MudItem>
+            </MudGrid>
+
+            <div style="height:50%; overflow-x: auto; overflow-y: auto;">
+                <MudSimpleTable Hover="@hover1" Bordered="@bordered1" Striped="@striped1"
+                                Style="width: 100%; box-sizing: border-box;">
+                    <thead>
+                        <tr>
+                            @foreach (var h in headings1)
+                            {
+                                <th style="text-align: center; padding: 1rem 8px; background-color: midnightblue; color: white;">@h</th>
+                            }
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var row in FilteredRows)
+                        {
+                            var columns = row.Split('|');
+                            <tr>
+                                @for (int i = 0; i < columns.Length; i++)
+                                {
+                                    <td style="text-align: center;">
+                                        @if (i == columns.Length - 1)
+                                        {
+                                            <MudButton Variant="Variant.Outlined"
+                                                       Color="Color.Primary"
+                                                       Size="Size.Small"
+                                                       OnClick="@(() => PreviewRow(row))">
+                                                Preview
+                                            </MudButton>
+                                        }
+                                        else
+                                        {
+                                            @columns[i]
+                                        }
+                                    </td>
+                                }
+                            </tr>
+                        }
+                    </tbody>
+                </MudSimpleTable>
+            </div>
+        </MudPaper>
+    </MudContainer>
+</MudContainer>
+<MudContainer Class="mt-6 px-8" MaxWidth="MaxWidth.False">
+    <MudGrid Justify="Justify.Center" Spacing="2">
+        <MudItem xs="12" sm="2" Class="d-flex justify-center">
+            <MudButton Variant="Variant.Outlined"
+                       Color="Color.Primary"
+                       Style="border-radius: 24px; padding: 12px 24px; font-weight: 500; text-transform: none; min-width: 150px;">
+                Invalid
+            </MudButton>
+        </MudItem>
+        <MudItem xs="12" sm="2" Class="d-flex justify-center">
+            <MudButton Variant="Variant.Outlined"
+                       Color="Color.Primary"
+                       Style="border-radius: 24px; padding: 12px 24px; font-weight: 500; text-transform: none; min-width: 150px;">
+                Submit
+            </MudButton>
+        </MudItem>
+
+        <MudItem xs="12" sm="2" Class="d-flex justify-center">
+            <MudButton Variant="Variant.Outlined"
+                       Color="Color.Primary"
+                       Style="border-radius: 24px; padding: 12px 24px; font-weight: 500; text-transform: none; min-width: 150px;">
+                Approve/Print
+            </MudButton>
+        </MudItem>
+    </MudGrid>
+</MudContainer>
+
+
+
+
+@code {
+    private bool hover1 = true;
+    private bool striped1 = true;
+    private bool bordered1 = true;
+
+    private string _searchText = "";
+    private string _selectedFilter = "Default";
+
+    string[] headings1 = { "Name of User", "Transaction ID", "Amount", "Type", "Date", "Information" };
+
+    string[] rows1 = {
+        "Charlie Reyes|1|10,000|ORS|June 16, 2025|Review",
+        "Jonathan Gonzales|2|1,000,000|NORSA|June 17, 2025|Review",
+        "Graeme Sta Ines|3|9,000|BURS|June 16, 2025|Review",
+        "Jhoebert Jaen|4|2,700,000,000|NORSA|June 17, 2025|Review",
+        "Chester Peren|5|9,000|ORS|June 16, 2025|Review",
+        "Charlie Reyes|1|10,000|ORS|June 16, 2025|Review",
+        "Jonathan Gonzales|2|1,000,000|NORSA|June 17, 2025|Review",
+        "Graeme Sta Ines|3|9,000|BURS|June 16, 2025|Review",
+        "Jhoebert Jaen|4|2,700,000,000|NORSA|June 17, 2025|Review",
+        "Chester Peren|5|9,000|ORS|June 16, 2025|Review"
+    };
+
+    IEnumerable<string> FilteredRows =>
+        rows1
+            .Where(r =>
+                (_selectedFilter == "Default" ||
+                 r.Split('|')[3].Equals(_selectedFilter, StringComparison.OrdinalIgnoreCase))
+                &&
+                (string.IsNullOrWhiteSpace(_searchText) ||
+                 r.Contains(_searchText, StringComparison.OrdinalIgnoreCase))
+            )
+            .OrderBy(r => _selectedFilter switch
+            {
+                "Latest" => r.Split('|')[4],
+                "Oldest" => r.Split('|')[4],
+                _ => null
+            });
+
+    private async Task OnOptionChanged(string value)
+    {
+        _selectedFilter = value;
+        await InvokeAsync(StateHasChanged);
+    }
+
+    private void RefreshTable()
+    {
+        _searchText = "";
+        _selectedFilter = "Default";
+        StateHasChanged(); // re-render UI
+    }
+
+    private void PreviewRow(string row)
+    {
+        Console.WriteLine($"Preview clicked for row: {row}");
+        // Later: open a dialog with details
+    }
+} *@

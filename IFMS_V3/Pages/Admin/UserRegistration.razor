@@ -1,0 +1,173 @@
+﻿@page "/user-registration"
+@using IFMS_V3.Dto.Add
+@using IFMS_V3.Models.User.Roles
+@using MudBlazor
+@layout MainLayout
+@using IFMS_V3.Services
+@inject IFMS_V3.Services.User.UserService UserService
+@inject ISnackbar Snackbar
+@inject AuthenticationStateProvider AuthProvider
+@inject NavigationManager Navigation
+@using Microsoft.AspNetCore.Components.Authorization
+
+<AuthorizeView>
+    <Authorized Context="auth">
+        <MudContainer MaxWidth="MaxWidth.False" Class="d-flex justify-center">
+            <MudPaper Elevation="3" Class="pa-6" Style="width:600px; border-radius:8px;">
+                <MudForm @ref="form">
+
+                    <MudGrid GutterSize="16px">
+                        <MudItem xs="12">
+                            <MudTextField @bind-Value="newUser.FirstName"
+                                          Label="First Name"
+                                          Placeholder="First Name"
+                                          Variant="Variant.Outlined"
+                                          FullWidth="true"
+                                          Required="true"
+                                          RequiredError="First Name is required" />
+                        </MudItem>
+
+                        <MudItem xs="12">
+                            <MudTextField @bind-Value="newUser.LastName"
+                                          Label="Last Name"
+                                          Placeholder="Enter Last Name"
+                                          Variant="Variant.Outlined"
+                                          FullWidth="true"
+                                          Required="true"
+                                          RequiredError="Last Name is required" />
+                        </MudItem>
+
+                        <MudItem xs="12">
+                            <MudTextField @bind-Value="newUser.Email"
+                                          Label="Email"
+                                          Placeholder="Enter Email"
+                                          Variant="Variant.Outlined"
+                                          FullWidth="true"
+                                          Required="true"
+                                          RequiredError="Email is required" />
+                        </MudItem>
+
+                        <MudItem xs="12">
+                            <MudSelect T="int"
+                                       Label="Role"
+                                       Placeholder="Select Role"
+                                       Variant="Variant.Outlined"
+                                       FullWidth="true"
+                                       @bind-Value="newUser.RoleId"
+                                       Required="true"
+                                       RequiredError="Role is required">
+                                @if (roles != null)
+                                {
+                                    @foreach (var role in roles)
+                                    {
+                                        <MudSelectItem Value="@role.Id">@role.Name</MudSelectItem>
+                                    }
+                                }
+                            </MudSelect>
+                        </MudItem>
+
+                        <MudItem xs="12" class="d-flex justify-center" style="margin-top:20px;">
+                            <MudButton Variant="Variant.Filled"
+                                       Disabled="@isLoading"
+                                       Class="mt-2"
+                                       Style="width: 100%; height: 40px; border-radius: 8px; font-weight: bold; background-color: black; color: white;"
+                                       OnClick="ValidateAndCreateAccount">
+                                @if (isLoading)
+                                {
+                                    <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
+                                    <span class="ms-2">Creating...</span>
+                                }
+                                else
+                                {
+                                    <span>Create Account</span>
+                                }
+                            </MudButton>
+                        </MudItem>
+                    </MudGrid>
+                </MudForm>
+            </MudPaper>
+        </MudContainer>
+    </Authorized>
+    <NotAuthorized>
+        <MudContainer Class="mt-6 d-flex justify-center">
+            <MudAlert Severity="Severity.Error">
+                You are not authorized to view this page. Please <a href="/">log in</a>.
+            </MudAlert>
+        </MudContainer>
+    </NotAuthorized>
+</AuthorizeView>
+
+@code {
+    private MudForm form;
+    private AddUserDto newUser = new();  // ✅ use DTO only
+    private List<RoleModel> roles = new();
+    private bool isLoading = false;
+
+    protected override async Task OnInitializedAsync()
+    {
+        var authState = await AuthProvider.GetAuthenticationStateAsync();
+        var user = authState.User;
+
+        if (!user.Identity?.IsAuthenticated ?? false)
+        {
+            return; // no redirect, just block
+        }
+
+        roles = await UserService.GetRolesAsync();
+    }
+
+    private async Task ValidateAndCreateAccount()
+    {
+        await form.Validate();
+        if (form.IsValid)
+        {
+            await HandleCreateAccount();
+        }
+        else
+        {
+            Snackbar.Add("Please fill in all required fields.", Severity.Error);
+        }
+    }
+
+    private async Task HandleCreateAccount()
+    {
+        isLoading = true;
+        try
+        {
+            var submittingSnackbar = Snackbar.Add("Submitting form...", Severity.Info, config =>
+            {
+                config.RequireInteraction = false;
+                config.HideIcon = false;
+                config.ShowCloseIcon = false;
+            });
+
+            var result = await UserService.CreateUser(newUser);
+
+            Snackbar.Remove(submittingSnackbar);
+
+            if (result?.Status == "SUCCESS")
+            {
+                Snackbar.Add("Account created successfully!", Severity.Success);
+
+                // ✅ reset form
+                newUser = new AddUserDto();
+
+                // ✅ navigate to user management page
+                await Task.Delay(1500); // small delay so snackbar shows
+                Navigation.NavigateTo("/user-management", forceLoad: true);
+            }
+            else
+            {
+                Snackbar.Add($"Error: {result?.Message}", Severity.Error);
+            }
+        }
+        catch (Exception ex)
+        {
+            Snackbar.Add($"Unhandled error: {ex.Message}", Severity.Error);
+        }
+        finally
+        {
+            isLoading = false;
+        }
+    }
+}

@@ -1,0 +1,197 @@
+﻿@page "/admin-budgetmanagement"
+@layout MainLayout
+@using IFMS_V3.Models.Ors.AdminDashboardModel
+@inject IDialogService DialogService
+@using Microsoft.AspNetCore.Components.Authorization
+@inject AuthenticationStateProvider AuthProvider
+@inject NavigationManager NavigationManager
+@inject ISnackbar Snackbar
+
+@inject IFMS_V3.Services.Ors.OrsService OrsService
+@using IFMS_V3.Dialogs.Norsa
+<AuthorizeView>
+    <Authorized>
+        <MudContainer Class="mt-4 px-8" MaxWidth="MaxWidth.False">
+            <MudContainer Class="px-0" MaxWidth="MaxWidth.False">
+                <MudPaper>
+                    <MudGrid Class="mb-4" AlignItems="AlignItems.Center">
+                        <!-- Search + Buttons in One Row -->
+                        <MudItem xs="12" sm="10" Class="d-flex align-center gap-2">
+                            <!-- Search -->
+                            <MudTextField @bind-Value="_searchText"
+                                          Placeholder="Search"
+                                          Variant="Variant.Outlined"
+                                          Adornment="Adornment.Start"
+                                          AdornmentIcon="@Icons.Material.Filled.Search"
+                                          Immediate="true"
+                                          Class="flex-grow-1"
+                                          Style="border-radius: 8px;" />
+
+                        </MudItem>
+                        <!-- Add Request Menu -->
+                        <MudItem xs="12" sm="2" Class="d-flex justify-end">
+                            <MudMenu Variant="Variant.Outlined"
+                                     Color="Color.Primary"
+                                     Label="Add Request"
+                                     Class="w-100">
+                                <MudMenuItem OnClick="GoToORSPage">ORS</MudMenuItem>
+                                <MudMenuItem OnClick="GoToBURSPage">BURS</MudMenuItem>
+                                <MudMenuItem OnClick="GoToNorsaPage">NORSA</MudMenuItem>
+                            </MudMenu>
+                        </MudItem>
+                    </MudGrid>
+
+                    <MudTabs>
+                        <MudTabPanel Text="ORS">
+                            @if (records == null)
+                            {
+                                <MudProgressCircular Indeterminate="true" Color="Color.Primary" />
+                            }
+                            else
+                            {
+                                <MudTable Items="FilteredRecords" Hover="true" Striped="true" Bordered="true">
+                                    <HeaderContent>
+                                        <MudTh Style="text-align:center; padding: 1rem 8px; background-color: midnightblue; color: white;">Payee</MudTh>
+                                        <MudTh Style="text-align:center; padding: 1rem 8px; background-color: midnightblue; color: white;">Transaction ID</MudTh>
+                                        <MudTh Style="text-align:center; padding: 1rem 8px; background-color: midnightblue; color: white;">Amount</MudTh>
+                                        <MudTh Style="text-align:center; padding: 1rem 8px; background-color: midnightblue; color: white;">Type</MudTh>
+                                        <MudTh Style="text-align:center; padding: 1rem 8px; background-color: midnightblue; color: white;">Status</MudTh>
+                                    </HeaderContent>
+                                    <RowTemplate Context="record">
+                                        <MudTd>@record.payee</MudTd>
+                                        <MudTd>@record.id</MudTd>
+                                        <MudTd>@record.amount</MudTd>
+                                        <MudTd>@record.type</MudTd>
+                                        <MudTd>@record.status</MudTd>
+                                    </RowTemplate>
+                                </MudTable>
+                            }
+                        </MudTabPanel>
+
+                        <MudTabPanel Text="BURS">
+                            @if (records == null)
+                            {
+                                <MudProgressCircular Indeterminate="true" Color="Color.Primary" />
+                            }
+                            else
+                            {
+                                <MudTable Items="bursRecords" Hover="true" Striped="true" Bordered="true">
+                                    <HeaderContent>
+                                        <MudTh Style="text-align:center; padding: 1rem 8px; background-color: midnightblue; color: white;">Payee</MudTh>
+                                        <MudTh Style="text-align:center; padding: 1rem 8px; background-color: midnightblue; color: white;">Transaction ID</MudTh>
+                                        <MudTh Style="text-align:center; padding: 1rem 8px; background-color: midnightblue; color: white;">Amount</MudTh>
+                                        <MudTh Style="text-align:center; padding: 1rem 8px; background-color: midnightblue; color: white;">Type</MudTh>
+                                        <MudTh Style="text-align:center; padding: 1rem 8px; background-color: midnightblue; color: white;">Status</MudTh>
+                                    </HeaderContent>
+                                    <RowTemplate Context="record">
+                                        <MudTd>@record.payee</MudTd>
+                                        <MudTd>@record.id</MudTd>
+                                        <MudTd>@record.amount</MudTd>
+                                        <MudTd>@record.type</MudTd>
+                                        <MudTd>@record.status</MudTd>
+                                    </RowTemplate>
+                                </MudTable>
+                            }
+                        </MudTabPanel>
+                    </MudTabs>
+
+                </MudPaper>
+            </MudContainer>
+        </MudContainer>
+    </Authorized>
+    <NotAuthorized>
+        <MudContainer Class="mt-6 d-flex justify-center">
+            <MudAlert Severity="Severity.Error">
+                <a href="/">log in</a>.
+            </MudAlert>
+        </MudContainer>
+    </NotAuthorized>
+</AuthorizeView>
+
+
+@code {
+    private bool hover1 = true;
+    private bool striped1 = true;
+    private bool bordered1 = true;
+
+    private string _selectedFilter = "All";
+    private string _searchText = string.Empty;
+    public double[] data = { 5, 2 };
+    public string[] labels = { "Complete", "Incomplete" };
+
+    private List<AdmindashboardModel> records = new();
+    private List<AdmindashboardModel> bursRecords = new();
+
+    private IEnumerable<AdmindashboardModel> FilteredRecords =>
+     records.Where(r =>
+         (_selectedFilter == "All" ||
+          (r.type?.ToString().Equals(_selectedFilter, StringComparison.OrdinalIgnoreCase) ?? false))
+         &&
+         (string.IsNullOrWhiteSpace(_searchText) ||
+          r.payee.Contains(_searchText, StringComparison.OrdinalIgnoreCase))
+     );
+
+    private void SetFilter(string filter)
+    {
+        _selectedFilter = filter;
+    }
+
+    // private async Task OnOptionChanged(string value)
+    // {
+    //     _selectedFilter = value;
+    //     await InvokeAsync(StateHasChanged);
+    // }
+
+    private void GoToORSPage()
+    {
+        NavigationManager.NavigateTo("/ors-form");
+    }
+
+
+    private void GoToBURSPage()
+    {
+        NavigationManager.NavigateTo("/burs-form");
+    }
+    private void GoToNorsaPage()
+    {
+        NavigationManager.NavigateTo("/norsa");
+    }
+    private async Task ShowNORSADialog()
+    {
+        var dialog = await DialogService.ShowAsync<Norsa>("NORSA");
+        var result = await dialog.Result;
+
+        if (result is { Canceled: false })
+        {
+        }
+    }
+    protected override async Task OnInitializedAsync()
+    {
+        var authState = await AuthProvider.GetAuthenticationStateAsync();
+        var user = authState.User;
+
+        if (!user.Identity.IsAuthenticated)
+        {
+            NavigationManager.NavigateTo("/", true);
+            return;
+        }
+
+        try
+        {
+            // ✅ Fetch ORS records
+            var orsResponse = await OrsService.GetAdminOrsDashboardDataAsync();
+            records = orsResponse?.Data?.Records ?? new List<AdmindashboardModel>();
+
+            // BURS
+            var bursResponse = await OrsService.GetAdminBursDashboardDataAsync();
+            bursRecords = bursResponse?.Data?.Records ?? new List<AdmindashboardModel>();
+        }
+        catch (Exception ex)
+        {
+            Snackbar.Add($"Failed to load dashboard data. {ex.Message}", Severity.Error);
+            records = new List<AdmindashboardModel>();
+            bursRecords = new List<AdmindashboardModel>();
+        }
+
+    }
+}

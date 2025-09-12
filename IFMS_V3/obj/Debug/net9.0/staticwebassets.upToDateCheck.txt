@@ -1,0 +1,14 @@
+wwwroot\css\app.css
+wwwroot\css\MainLayout.css
+wwwroot\fonts\ARIAL.TTF
+wwwroot\icon-192.png
+wwwroot\index.html
+wwwroot\js\pdfHelper.js
+wwwroot\Sample-data\BagongPH.png
+wwwroot\Sample-data\Bago_PH.png
+wwwroot\Sample-data\DENR.png
+wwwroot\Sample-data\Ors.pdf
+C:\Users\Jona Lira\source\repos\IFMS_V3\IFMS_V3\wwwroot\css\app.css
+C:\Users\Jona Lira\source\repos\IFMS_V3\IFMS_V3\wwwroot\css\MainLayout.css
+C:\Users\Jona Lira\source\repos\IFMS_V3\IFMS_V3\wwwroot\index.html
+C:\Users\Jona Lira\source\repos\IFMS_V3\IFMS_V3\wwwroot\js\pdfHelper.js

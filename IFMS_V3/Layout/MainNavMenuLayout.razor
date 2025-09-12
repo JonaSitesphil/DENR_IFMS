@@ -1,0 +1,53 @@
+﻿@* ﻿@using IFMS_V3.Services.Auth
+@using Microsoft.AspNetCore.Components.Authorization
+@inject HttpClient HttpClient
+@inject NavigationManager NavigationManager
+@inject AuthenticationStateProvider AuthenticationStateProvider
+@inject AuthService AuthService
+
+
+<MudPaper Width="240px" Class="py-1" Elevation="0" Style="display: flex; flex-direction: column; justify-content: space-between; height: 100vh;">
+    <MudNavMenu Rounded="true" Margin="Margin.Dense" Color="Color.Tertiary" Class="pa-2">
+        <MudNavLink Href="/Dashboard/Admin" Match="NavLinkMatch.All" Icon="@Icons.Material.Outlined.Dashboard">Dashboard</MudNavLink>
+        <MudNavGroup Title="Personnel Management" Style="font-size: 0.75rem;" Icon="@Icons.Material.Filled.PersonOutline" Expanded="false">
+            <MudNavLink Href="/User/Management" Match="NavLinkMatch.Prefix">User Management</MudNavLink>
+        </MudNavGroup>
+    </MudNavMenu>
+
+    <!-- MudButton at the bottom center of the sidebar -->
+    <MudNavMenu Rounded="true" Margin="Margin.Dense" Class="pa-2 mb-3">
+        <MudNavLink Icon="@Icons.Material.Filled.Logout" IconColor="Color.Error" OnClick="HandleLogout" Match="NavLinkMatch.All">
+            Logout
+        </MudNavLink>
+    </MudNavMenu>
+</MudPaper>
+
+
+@code {
+    private bool collapseNavMenu = true;
+
+    private string? NavMenuCssClass => collapseNavMenu ? "collapse" : null;
+
+    private void ToggleNavMenu()
+    {
+        collapseNavMenu = !collapseNavMenu;
+    }
+
+    private async Task HandleLogout()
+    {
+        var success = await AuthService.LogoutAsync();
+
+        // Notify logout and redirect only if API succeeded
+        if (success)
+        {
+            var authStateProvider = (CookieAuthenticationStateProvider)AuthenticationStateProvider;
+            authStateProvider.NotifyUserLoggedOut();
+            NavigationManager.NavigateTo("/", true);
+        }
+        else
+        {
+            // Optionally show error to user
+            Console.WriteLine("Logout failed.");
+        }
+    }
+} *@

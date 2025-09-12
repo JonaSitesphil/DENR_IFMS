@@ -1,0 +1,134 @@
+﻿@using System.Text.Json
+@using System.Linq
+@using IFMS_V3.Models.Ors
+@using IFMS_V3.Dto.Add
+@inject IFMS_V3.Services.Ors.OrsService OrsService
+@inject ISnackbar Snackbar
+
+<MudDialog>
+    <DialogContent>
+        <MudText Typo="Typo.h6" Class="mb-2">Confirm ORS Submission</MudText>
+        <MudDivider Class="mb-2" />
+
+        <MudForm>
+            <MudNumericField T="int" @bind-Value="EditableOrsForm.Ors_Id" Label="ORSID" ReadOnly="true" />
+            <MudTextField @bind-Value="EditableOrsForm.OrsNumber" Label="ORS Number" ReadOnly="true" />
+            <MudDatePicker T="DateTime?" @bind-Date="EditableOrsForm.OrsDate" Label="ORS Date" ReadOnly="true" />
+            <MudTextField @bind-Value="EditableOrsForm.Payee" Label="Payee" ReadOnly="true" />
+            <MudNumericField T="double" @bind-Value="EditableOrsForm.Amount" Label="Amount" ReadOnly="true" />
+
+            <MudTextField Label="Fund Code" Value="@GetFundCodeName(EditableOrsForm.FundCodeId)" ReadOnly="true" />
+            <MudTextField Label="Fund Cluster" Value="@GetFundClusterName(EditableOrsForm.FundClusterId)" ReadOnly="true" />
+            <MudTextField Label="MFO/PAP" Value="@GetMfoPapName(EditableOrsForm.MfoPapId)" ReadOnly="true" />
+            <MudTextField Label="UACS Code" Value="@GetUacsName(EditableOrsForm.UacsCodeId)" ReadOnly="true" />
+            <MudTextField Label="Allotment Class" Value="@EditableOrsForm.AllotmentClass.ToString()" ReadOnly="true" />
+            <MudTextField Label="Responsibility Center" Value="@GetResponsibilityCenterName(EditableOrsForm.ResponsibilityCenterId)" ReadOnly="true" />
+
+            <MudTextField @bind-Value="EditableOrsForm.Address" Label="Address" ReadOnly="true" />
+            <MudTextField @bind-Value="EditableOrsForm.Office" Label="Office" ReadOnly="true" />
+            <MudTextField @bind-Value="EditableOrsForm.Particulars" Label="Particulars" ReadOnly="true" />
+            <MudTextField @bind-Value="EditableOrsForm.SignatoryA" Label="Signatory A" ReadOnly="true" />
+            <MudTextField @bind-Value="EditableOrsForm.PositionA" Label="Position A" ReadOnly="true" />
+            <MudTextField @bind-Value="EditableOrsForm.SignatoryB" Label="Signatory B" ReadOnly="true" />
+            <MudTextField @bind-Value="EditableOrsForm.PositionB" Label="Position B" ReadOnly="true" />
+            <MudNumericField T="double" @bind-Value="EditableOrsForm.Total" Label="Total" ReadOnly="true" />
+        </MudForm>
+    </DialogContent>
+
+    <DialogActions>
+        <MudButton Color="Color.Default" OnClick="Cancel">Cancel</MudButton>
+        <MudButton Color="Color.Primary" OnClick="Confirm">Confirm</MudButton>
+    </DialogActions>
+</MudDialog>
+
+@code {
+    [CascadingParameter] IMudDialogInstance MudDialog { get; set; }
+    [Parameter] public OrsModel OrsForm { get; set; }
+    private OrsModel EditableOrsForm = new();
+
+    private List<FundCode> fundCodes = new();
+    private List<FundCluster> fundClusters = new();
+    private List<MFOPAP> mfopaps = new();
+    private List<UACS> uacs = new();
+    private List<ResponsibilityCenter> responsibilityCenters = new();
+
+    protected override async Task OnInitializedAsync()
+    {
+        // Copy OrsForm values to EditableOrsForm
+        foreach (var prop in typeof(OrsModel).GetProperties())
+            prop.SetValue(EditableOrsForm, prop.GetValue(OrsForm));
+
+        try
+        {
+            fundCodes = await OrsService.GetFundCodes();
+            fundClusters = await OrsService.GetFundClusters();
+            mfopaps = await OrsService.GetMFOPAPs();
+            uacs = await OrsService.GetUACS();
+            responsibilityCenters = await OrsService.GetResponsibilityCenters();
+        }
+        catch (Exception ex)
+        {
+            Snackbar.Add($"Failed to load dropdown data: {ex.Message}", Severity.Error);
+        }
+    }
+
+    private string GetFundCodeName(int id)
+    {
+        var fc = fundCodes.FirstOrDefault(f => f.id == id);
+        return fc == null ? string.Empty : $"{fc.fundCodeNumber} - {fc.fundCodeDescription}";
+    }
+
+    private string GetFundClusterName(int id) =>
+        fundClusters.FirstOrDefault(fc => fc.id == id)?.fundClusterName ?? string.Empty;
+
+    private string GetMfoPapName(int id)
+    {
+        var m = mfopaps.FirstOrDefault(x => x.id == id);
+        return m == null ? string.Empty : $"{m.mfoPapCode} - {m.mfoPapDescription}";
+    }
+
+    private string GetUacsName(int id)
+    {
+        var item = uacs.FirstOrDefault(u => u.id == id);
+        if (item == null) return string.Empty;
+        return string.IsNullOrWhiteSpace(item.subObjectCode) ? item.uacs.ToString() : $"{item.subObjectCode} - {item.uacs}";
+    }
+
+    private string GetResponsibilityCenterName(int id)
+    {
+        var rc = responsibilityCenters.FirstOrDefault(x => x.id == id);
+        return rc == null ? string.Empty : $"{rc.rcCode} - {rc.rcName}";
+    }
+
+    private void Cancel() => MudDialog.Cancel();
+
+    private async Task Confirm()
+    {
+        var result = await OrsService.CreateORSAsync(EditableOrsForm);
+        if (result.Status == "SUCCESS")
+        {
+            MudDialog.Close(DialogResult.Ok(EditableOrsForm));
+        }
+        else
+        {
+            try
+            {
+                var errorDetails = JsonSerializer.Deserialize<OrsValidationError>(result.Message, new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
+                if (errorDetails?.Errors != null)
+                {
+                    foreach (var field in errorDetails.Errors)
+                        foreach (var msg in field.Value)
+                            Snackbar.Add(msg, Severity.Error);
+                }
+                else
+                {
+                    Snackbar.Add($"Failed to create ORS: {result.Message}", Severity.Error);
+                }
+            }
+            catch
+            {
+                Snackbar.Add($"Failed to create ORS: {result.Message}", Severity.Error);
+            }
+        }
+    }
+}
