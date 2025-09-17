@@ -1,7 +1,7 @@
 {
   "mainAssemblyName": "IFMS_V3",
   "resources": {
-    "hash": "sha256-LaU4ojXcvBuJ2CkVl27+aiUjO0sWLgvPb42g06oF6Wc=",
+    "hash": "sha256-c3o9EKuDop515F13PmVIw4YyYIPn5sbQFRlwa7sINWM=",
     "fingerprinting": {
       "AuralizeBlazor.s2t6tikn24.wasm": "AuralizeBlazor.wasm",
       "Auth0.Core.4zf11iq8fw.wasm": "Auth0.Core.wasm",
@@ -244,8 +244,8 @@
       "icudt_CJK.tjcz0u77k5.dat": "icudt_CJK.dat",
       "icudt_EFIGS.tptq2av103.dat": "icudt_EFIGS.dat",
       "icudt_no_CJK.lfu7j35m59.dat": "icudt_no_CJK.dat",
-      "IFMS_V3.cd81jwlwek.wasm": "IFMS_V3.wasm",
-      "IFMS_V3.ytv2jw989b.pdb": "IFMS_V3.pdb"
+      "IFMS_V3.l54lhrxgs6.wasm": "IFMS_V3.wasm",
+      "IFMS_V3.fiyioznnob.pdb": "IFMS_V3.pdb"
     },
     "jsModuleNative": {
       "dotnet.native.st0ovrfdhi.js": "sha256-MBW/zayfv+YU6mhH7y4b8NNU4D1EYd7nf9gYrFshnnY="
@@ -498,10 +498,10 @@
       "WindowsBase.pg3o6xzigg.wasm": "sha256-dz62CHynC+zqTkbMOf3vm7YAhiRA8/pIoAwuqHfBL5M=",
       "mscorlib.jl2pswegra.wasm": "sha256-mSoCIDTdCQKTipW8VmFCypW/4AopZauaYRa8LoZdHvY=",
       "netstandard.uriri6ambh.wasm": "sha256-yuH/cvPd6r8N9nfPWihyckFD7hPFP+VQtQQxEqi7HIQ=",
-      "IFMS_V3.cd81jwlwek.wasm": "sha256-oKP+9K0y2Ep/C+wxJavAPKq7Dhc6lJfoEkKj5xZyKkk="
+      "IFMS_V3.l54lhrxgs6.wasm": "sha256-SRU7vAZcyQ1tWal0uAN0/N93iNWE3epJkMPUtGe7QpI="
     },
     "pdb": {
-      "IFMS_V3.ytv2jw989b.pdb": "sha256-phAsdrlnIIBVVYLCh89lFo0xV2YT/kUbct2tkAhLjq4="
+      "IFMS_V3.fiyioznnob.pdb": "sha256-NzNPBostWOh5GvENDMoYYmTtbkgLgC50tShVF4PlFSQ="
     },
     "libraryInitializers": {
       "_content/BlazorJS/BlazorJS.o5pk8zvhtc.lib.module.js": "sha256-pJ9th4xzJ1OMZjS4dv7BMz2u879ku+Hu3qkTZk+1LGw=",
